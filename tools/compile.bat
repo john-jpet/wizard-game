@@ -1,33 +1,39 @@
 @echo off
 setlocal
-
-REM run from repo root
 cd /d "%~dp0\.."
 
 set name=wizard
 
-REM cc65 toolchain
-if "%CC65_HOME%"=="" (
-  echo CC65_HOME not set
-  pause
-  exit /b 1
-)
-set PATH=%PATH%;%CC65_HOME%\bin\
+REM ---- point these at your cc65 install ----
+REM If tools\ is inside the cc65 folder, CC65_HOME=..\ is fine.
+REM Otherwise set CC65_HOME to your real cc65 root:
+REM set CC65_HOME=C:\Users\johnp\Documents\CC65\cc65-snapshot-win32
+set CC65_HOME=..\
 
-REM ensure build folder exists
+set PATH=%PATH%;%CC65_HOME%\bin
+
 if not exist build mkdir build
 
-REM compile C -> .s (assembly)
-cc65 --target nes -Oirs -I include src\main.c --add-source -o build\%name%.s
+REM ---- C -> .s ----
+cc65 -Oirs -I include src\main.c    --add-source -o build\main.s
+cc65 -Oirs -I include src\player.c  --add-source -o build\player.s
+cc65 -Oirs -I include src\enemies.c --add-source -o build\enemies.s
+cc65 -Oirs -I include src\bullets.c --add-source -o build\bullets.s
+cc65 -Oirs -I include src\gfx.c     --add-source -o build\gfx.s
 
-REM assemble startup + game
-ca65 --target nes lib\crt0.s -o build\crt0.o
-ca65 --target nes build\%name%.s -g -o build\%name%.o
+REM ---- assemble ----
+ca65 lib\crt0.s        -o build\crt0.o
+ca65 build\main.s   -g -o build\main.o
+ca65 build\player.s -g -o build\player.o
+ca65 build\enemies.s -g -o build\enemies.o
+ca65 build\bullets.s -g -o build\bullets.o
+ca65 build\gfx.s    -g -o build\gfx.o
 
-REM link (IMPORTANT: use the toolchain nes.lib)
+REM ---- link ----
 ld65 -C cfg\nrom_32k_vert.cfg ^
   -o build\%name%.nes ^
-  build\crt0.o build\%name%.o "%CC65_HOME%\lib\nes.lib" ^
+  build\crt0.o build\main.o build\player.o build\enemies.o build\bullets.o build\gfx.o ^
+  "%CC65_HOME%\lib\nes.lib" ^
   -Ln build\labels.txt --dbgfile build\dbg.txt
 
 pause

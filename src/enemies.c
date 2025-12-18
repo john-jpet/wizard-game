@@ -1,0 +1,86 @@
+// src/enemies.c
+#include "enemies.h"
+#include "bullets.h"
+#include "gfx.h"
+
+
+Enemy enemies[MAX_ENEMIES];
+signed char lane_enemy[LANES];
+
+// lane helper
+unsigned char enemy_lane_from_center(unsigned char ex) {
+  return (unsigned char)((ex + 8) >> LANE_SHIFT);
+}
+
+void enemies_init(void) {
+  unsigned char i;
+  for (i = 0; i < MAX_ENEMIES; i++) enemies[i].active = 0;
+}
+
+void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
+  unsigned char i;
+  for (i = 0; i < MAX_ENEMIES; i++) {
+    if (!enemies[i].active) {
+      enemies[i].active = 1;
+      enemies[i].x = x;
+      enemies[i].y = y;
+      enemies[i].width = 16;
+      enemies[i].height = 16;
+      enemies[i].vx = 1;
+      enemies[i].vy = 0;
+      enemies[i].hp = (type == 0) ? 3 : 1;
+      enemies[i].anim = rand8() % 60;
+      enemies[i].type = type;
+      return;
+    }
+  }
+}
+
+void enemies_update(void) {
+  unsigned char i;
+  for (i = 0; i < MAX_ENEMIES; i++) {
+    if (!enemies[i].active) continue;
+
+    if (enemies[i].type == 0) enemies[i].y++;
+    else if (enemies[i].type == 1) enemies[i].y += 2;
+
+    enemies[i].anim++;
+    if (enemies[i].anim >= 60) enemies[i].anim = 0;
+
+    if (enemies[i].anim == 30 && enemies[i].type == 0) {
+      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 8, 0, 3);
+    }
+  }
+}
+
+void enemies_draw(void) {
+  unsigned char i;
+  for (i = 0; i < MAX_ENEMIES; i++) {
+    if (!enemies[i].active) continue;
+
+    if (enemies[i].anim < 30) {
+      if (enemies[i].type == 0) oam_meta_spr(enemies[i].x, enemies[i].y, imp);
+      else                      oam_meta_spr(enemies[i].x, enemies[i].y, diveimp);
+    } else {
+      if (enemies[i].type == 0) oam_meta_spr(enemies[i].x, enemies[i].y, imp1);
+      else                      oam_meta_spr(enemies[i].x, enemies[i].y, diveimp1);
+    }
+  }
+}
+
+void build_lane_enemy_table(void) {
+  unsigned char l, i;
+
+  for (l = 0; l < LANES; l++) lane_enemy[l] = -1;
+
+  for (i = 0; i < MAX_ENEMIES; i++) {
+    unsigned char lane;
+    if (!enemies[i].active) continue;
+
+    lane = enemy_lane_from_center(enemies[i].x);
+
+    if (lane_enemy[lane] < 0 || enemies[i].y > enemies[(unsigned char)lane_enemy[lane]].y) {
+      lane_enemy[lane] = (signed char)i;
+    }
+  }
+}
