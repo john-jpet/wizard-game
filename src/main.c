@@ -1,76 +1,85 @@
-/*	example code for cc65, for NES
- *  construct some sprites / metasprites
- *	using neslib
- *	Doug Fraker 2018
- */	
+/*
+ * Wizard's Stand: Defender of the Realm (NES)
+ * -----------------
+ * Author: John Petruzziello
+ * Built with cc65 and neslib / nesdoug from Doug Fraker
+ *
+ * Description:
+ * Core gameplay logic, enemy systems, and collision handling.
+ */
+ 
 
- 
- 
+// Include neslib and nesdoug headers
 #include "neslib.h"
 #include "nesdoug.h"
 
-//#include "Sprites.h" // holds our metasprite data
-// GLOBAL VARIABLES
 
+// Definitions
+
+// max number of bullets/enemies on screen
 #define MAX_BULLETS 4
 #define MAX_ENEMIES 6
+
+// bullet properties
 #define BULLET_TILE 0x15
 #define BULLET_PAL 1
+
+// enemy properties
 #define ENEMY_PAL 2
 #define ENEMY_SPAWN_MIN_X  8
 #define ENEMY_SPAWN_MAX_X  232   // 256 - 16 - 8
+
 // cheap broad-phase before calling check_collision
 #define BULLET_NEAR_X  20
 #define BULLET_NEAR_Y  20
-#define HIT(ax,ay,aw,ah,bx,by,bw,bh) \
-  ((ax) < (unsigned char)((bx)+(bw)) && (unsigned char)((ax)+(aw)) > (bx) && \
-   (ay) < (unsigned char)((by)+(bh)) && (unsigned char)((ay)+(ah)) > (by))
+
+// hit detection macro
 #define LANES 16
 signed char lane_enemy[LANES];   // index of best candidate enemy per lane (-1 = none)
 #define LANE_SHIFT 4  // 16px lanes
 
-static unsigned char enemy_lane_from_center(unsigned char ex) {
-    // enemy is 16px wide -> center = x + 8
-    return (unsigned char)((ex + 8) >> LANE_SHIFT);
-}
-
-static unsigned char bullet_lane_from_center(unsigned char bx) {
-    // bullet is 4px wide -> center = x + 2
-    return (unsigned char)((bx + 2) >> LANE_SHIFT);
-}
+// open zeropage for frequently used variables
 #pragma bss-name(push, "ZEROPAGE")
 
+// Input variables
 unsigned char pad;
 unsigned char pad_prev;
 unsigned char pad_new;
 
+// Movement and animation variables
 unsigned char moving = 0;
 unsigned char right = 0;
 
 unsigned char animframe = 0;
 unsigned char animtimer = 0;
 
+// Loop counters
 unsigned char enemy_i;
 unsigned char bullet_i;
 unsigned char ebullet_i;
 
-
-
+// Game variables
 unsigned char enemycounter = 0;
 unsigned char collision;
 
+// End zeropage
 #pragma bss-name(pop)
 
+// Struct definitions
 
+// Sprite structure
 struct sprite {
 	unsigned char x;
 	unsigned char y;
 	unsigned char width;
 	unsigned char height;
 };
+
+// Player and star sprites
 struct sprite wizard = {0x8F,0xCC,15,15};
 struct sprite star = {0x10,0x10,7,7};
 
+// Enemy structure
 struct enemy {
     unsigned char x, y, width, height;
     signed char vx, vy;
@@ -80,24 +89,26 @@ struct enemy {
 	unsigned char type;		 // optional
 };
 
+// Bullet structure
 struct fireball {
     unsigned char x, y, width, height;
     signed char vx, vy;         // signed = can go left/up
     unsigned char active;
 };
 
-
+// Enemy bullet structure
 struct enemyfireball {
     unsigned char x, y, width, height;
     signed char vx, vy;         // signed = can go left/up
     unsigned char active;
 };
 
+// Arrays for enemy bullets, enemies, and player bullets
 struct enemyfireball ebullets[MAX_BULLETS];
 struct enemy enemies[MAX_ENEMIES];
 struct fireball bullets[MAX_BULLETS];
 
-
+// Sprite data
 const unsigned char wizardwalkr2[]={
 	  0,  0,0x20,0|OAM_FLIP_H,
 	  0,  8,0x30,0|OAM_FLIP_H,
@@ -177,6 +188,7 @@ const unsigned char diveimp1[]={
 	128
 };
 
+// Palette data
 const unsigned char palette_bg[]={
 0x0f, 0x00, 0x10, 0x30, // black, gray, lt gray, white
 0,0,0,0,
@@ -193,19 +205,44 @@ const unsigned char palette_sp[]={
 
 
 
-
+// Text data
 const unsigned char text[]="Press any button to start!";
 
+// Function prototypes
+
+// Utility functions
+
+// Check enemy lane based on enemy x position
+    //Parameters: ex - enemy x position
+static unsigned char enemy_lane_from_center(unsigned char ex) {
+    // enemy is 16px wide -> center = x + 8
+    return (unsigned char)((ex + 8) >> LANE_SHIFT);
+}
+
+// Check bullet lane based on bullet x position
+    //Parameters: bx - bullet x position
+static unsigned char bullet_lane_from_center(unsigned char bx) {
+    // bullet is 4px wide -> center = x + 2
+    return (unsigned char)((bx + 2) >> LANE_SHIFT);
+}
+
+// Random range function
+    //Parameters: min - minimum value, max - maximum value
 unsigned char rand_range(unsigned char min, unsigned char max) {
     // inclusive range [min, max]
     return min + (rand8() % (max - min + 1));
 }
 
+// Bullet initialization
+    // Initializes all player bullets to inactive
 void bullets_init(void) {
     for (bullet_i = 0; bullet_i < MAX_BULLETS; bullet_i++) {
         bullets[bullet_i].active = 0;
     }
 }
+
+// Fire a player bullet
+    //Parameters: x - x position, y - y position, vx - x velocity, vy - y velocity
 void fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char vy) {
     for (bullet_i = 0; bullet_i < MAX_BULLETS; bullet_i++) {
         if (!bullets[bullet_i].active) {
@@ -220,11 +257,17 @@ void fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char v
         }
     }
 }
+
+// Enemy bullet initialization
+    // Initializes all enemy bullets to inactive
 void ebullets_init(void) {
     for (ebullet_i = 0; ebullet_i < MAX_BULLETS; ebullet_i++) {
         ebullets[ebullet_i].active = 0;
     }
 }
+
+// Fire an enemy bullet
+    //Parameters: x - x position, y - y position, vx - x velocity, vy - y velocity
 void enemy_fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char vy) {
     for (ebullet_i = 0; ebullet_i < MAX_BULLETS; ebullet_i++) {
         if (!ebullets[ebullet_i].active) {
@@ -239,11 +282,17 @@ void enemy_fire_bullet(unsigned char x, unsigned char y, signed char vx, signed 
         }
     }
 }
+
+// Enemy initialization
+    // Initializes all enemies to inactive
 void enemies_init(void) {
     for (enemy_i = 0; enemy_i < MAX_ENEMIES; enemy_i++) {
         enemies[enemy_i].active = 0;
     }
 }
+
+// Spawn a new enemy
+    //Parameters: x - x position, y - y position, type - enemy type
 void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
     for (enemy_i = 0; enemy_i < MAX_ENEMIES; enemy_i++) {
         if (!enemies[enemy_i].active) {
@@ -261,24 +310,25 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
         }
     }
 }
+
+// Update enemy positions and behaviors
 void enemies_update() {
     for (enemy_i = 0; enemy_i < MAX_ENEMIES; enemy_i++) {
+
         if (!enemies[enemy_i].active) continue;
-
-        //if (enemies[enemy_i].x < px && enemies[enemy_i].type == 0) enemies[enemy_i].x++;
-        //else if (enemies[enemy_i].x > px && enemies[enemy_i].type == 0) enemies[enemy_i].x--;
-
-        //enemies[enemy_i].y++;
 		if(enemies[enemy_i].type == 0) enemies[enemy_i].y++;
 		else if (enemies[enemy_i].type == 1) enemies[enemy_i].y+=2;
 
         enemies[enemy_i].anim++;
 		if(enemies[enemy_i].anim >= 60) enemies[enemy_i].anim = 0;
 		if(enemies[enemy_i].anim == 30 && enemies[enemy_i].type == 0) {
-			enemy_fire_bullet(enemies[enemy_i].x + 4, enemies[enemy_i].y + 8, 0, 3);
+			enemy_fire_bullet(enemies[enemy_i].x + 4, enemies[enemy_i].y + 8, 0, ENEMY_PAL);
 		}	
     }
 }
+
+// Draw enemies on screen
+    // Uses different sprites based on animation frame and type
 void enemies_draw(void) {
     for (enemy_i = 0; enemy_i < MAX_ENEMIES; enemy_i++) {
         if (!enemies[enemy_i].active) continue;
@@ -297,6 +347,8 @@ void enemies_draw(void) {
     }
 }
 
+// Animate the wizard based on movement and actions
+    // Updates animation frames and draws the appropriate sprite
 void animate_wizard(void) {
 	if (moving){
 			animtimer++;
@@ -329,7 +381,7 @@ void animate_wizard(void) {
 		}
 }
 
-
+// Build lane to enemy mapping for collision detection
 void build_lane_enemy_table(void) {
     unsigned char l;
 
@@ -347,7 +399,7 @@ void build_lane_enemy_table(void) {
     }
 }
 
-
+// Check collision between a bullet and an enemy
 void player_bullets_update_collide_draw(void) {
     for (bullet_i = 0; bullet_i < MAX_BULLETS; bullet_i++) {
         signed char ei;
@@ -392,7 +444,7 @@ void player_bullets_update_collide_draw(void) {
 
 
 
-
+// Main game loop
 void main (void) {
 	
 	ppu_off(); // screen off
@@ -416,6 +468,8 @@ void main (void) {
 	vram_write(text,sizeof(text));
 	
 	ppu_on_all(); // turn on screen
+
+    // Wait for player to press a button
 	while (1) {
 		ppu_wait_nmi();
 		pad = pad_poll(0);
@@ -429,18 +483,11 @@ void main (void) {
 	vram_adr(NTADR_A(1,1)); // set a start position for the text
 	vram_fill(0x00,sizeof(text)); // fill with spaces (0x00)
 	
+    // Main game loop
 	while (1){
 
 		ppu_wait_nmi(); 
-		enemycounter++;
-		if (enemycounter == 240)
-		{
-			enemycounter = 0;
-			spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 0);
-		}
-		if(enemycounter == 120) {
-			spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 1);
-		}
+		
 		// infinite loop
 
 		// wait till beginning of the frame
@@ -481,11 +528,21 @@ void main (void) {
 		}
 		if (pad & PAD_LEFT)  {wizard.x-=2; moving=1; right = 0;}
 		if (pad & PAD_RIGHT) {wizard.x+=2; moving=1; right = 1;}
+        enemycounter++;
+		if (enemycounter == 240)
+		{
+			enemycounter = 0;
+			spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 0);
+		}
+		if(enemycounter == 120) {
+			spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 1);
+		}
 		enemies_update();
 		build_lane_enemy_table();          // NEW (after enemy movement)
 		enemies_draw();
 		animate_wizard();
 		player_bullets_update_collide_draw();
+        
 		//if (pad & PAD_UP)    y_position--;
 		//if (pad & PAD_DOWN)  y_position++;
 		
