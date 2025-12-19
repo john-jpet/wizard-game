@@ -3,29 +3,27 @@
 #include "bullets.h"
 #include "neslib.h"
 #include "nesdoug.h"
-#include "gfx.h"
 
-
-// Player sprite state
 Sprite wizard = { 0x8F, 0xCC, 16, 16 };
 
-// Input + animation state lives here (player-owned)
-static unsigned char pad;
-static unsigned char pad_prev;
-static unsigned char pad_new;
+static unsigned char pad, pad_prev, pad_new;
+static unsigned char moving, right, animframe, animtimer;
 
-static unsigned char moving;
-static unsigned char right;
-static unsigned char animframe;
-static unsigned char animtimer;
+// health state
+static unsigned char hp;
+static unsigned char iframes;   // counts down when >0
+
+extern const unsigned char wizardwalkr1[];
+extern const unsigned char wizardwalkr2[];
+extern const unsigned char wizardwalk1[];
+extern const unsigned char wizardwalk2[];
+extern const unsigned char wizardstand[];
+extern const unsigned char wizardfire[];
 
 static void animate_wizard(void) {
     if (moving) {
         animtimer++;
-        if (animtimer == 4) {
-            animtimer = 0;
-            animframe++;
-        }
+        if (animtimer == 4) { animtimer = 0; animframe++; }
 
         if (animframe & 1) {
             oam_meta_spr(wizard.x, wizard.y, (right ? wizardwalkr1 : wizardwalk1));
@@ -35,16 +33,12 @@ static void animate_wizard(void) {
     } else {
         animtimer = 0;
         animframe = 0;
-        if (pad & PAD_B) {
-            oam_meta_spr(wizard.x, wizard.y, wizardfire);
-        } else {
-            oam_meta_spr(wizard.x, wizard.y, wizardstand);
-        }
+        if (pad & PAD_B) oam_meta_spr(wizard.x, wizard.y, wizardfire);
+        else            oam_meta_spr(wizard.x, wizard.y, wizardstand);
     }
 }
 
 void player_init(void) {
-    // If you want: reset everything cleanly
     pad = pad_prev = pad_new = 0;
     moving = right = 0;
     animframe = animtimer = 0;
@@ -53,29 +47,47 @@ void player_init(void) {
     wizard.y = 0xCC;
     wizard.width = 16;
     wizard.height = 16;
+
+    hp = 3;
+    iframes = 0;
 }
 
 void player_update(void) {
+    if (iframes) iframes--;
+
     pad = pad_poll(0);
     pad_new = (pad ^ pad_prev) & pad;
     pad_prev = pad;
 
     moving = 0;
 
-    // Fire bullet on new press
     if (pad_new & PAD_B) {
         fire_bullet(wizard.x + 4, wizard.y + 8, 0, -4);
     }
 
-    // Movement
     if (pad & PAD_LEFT)  { wizard.x -= 2; moving = 1; right = 0; }
     if (pad & PAD_RIGHT) { wizard.x += 2; moving = 1; right = 1; }
 
-    // Potential future change?: clamp to screen bounds
     // if (wizard.x < 8) wizard.x = 8;
     // if (wizard.x > 232) wizard.x = 232;
 }
 
 void player_draw(void) {
+    // blink while invincible (skip drawing on alternating frames)
+    if (iframes) {
+        if (iframes & 2) return; // adjust mask for blink speed
+    }
     animate_wizard();
+}
+
+unsigned char player_get_hp(void) { return hp; }
+unsigned char player_is_dead(void) { return (hp == 0); }
+unsigned char player_is_invincible(void) { return (iframes != 0); }
+
+void player_take_damage(void) {
+    if (hp == 0) return;
+    if (iframes) return;
+
+    hp--;
+    iframes = 60; // ~1 second at 60fps
 }

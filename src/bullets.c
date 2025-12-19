@@ -1,6 +1,7 @@
 // src/bullets.c
 #include "bullets.h"
 #include "enemies.h"
+#include "player.h"
 
 Fireball bullets[MAX_BULLETS];
 EnemyFireball ebullets[MAX_BULLETS];
@@ -107,6 +108,13 @@ void enemy_bullets_update_collide_draw(void) {
 
         if (ebullets[bi].y > 0xF0) {
             ebullets[bi].active = 0;
+            continue;
+        }
+        
+        // collide with player
+        if (!player_is_invincible() && check_collision(&ebullets[bi], &wizard)) {
+            ebullets[bi].active = 0;
+            player_take_damage();
             continue;
         }
 

@@ -11,4 +11,10 @@ void player_init(void);
 void player_update(void); // reads input, moves wizard, fires bullets
 void player_draw(void);   // draws wizard metasprite
 
+// health
+unsigned char player_get_hp(void);
+unsigned char player_is_dead(void);
+unsigned char player_is_invincible(void);
+void player_take_damage(void);
+
 #endif

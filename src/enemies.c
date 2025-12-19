@@ -1,8 +1,10 @@
 // src/enemies.c
 #include "enemies.h"
 #include "bullets.h"
+#include "player.h"
 #include "gfx.h"
 
+#define ENEMY_BOTTOM_Y 0xD8
 
 Enemy enemies[MAX_ENEMIES];
 signed char lane_enemy[LANES];
@@ -43,6 +45,11 @@ void enemies_update(void) {
 
     if (enemies[i].type == 0) enemies[i].y++;
     else if (enemies[i].type == 1) enemies[i].y += 2;
+    if (enemies[i].y >= ENEMY_BOTTOM_Y) {
+      enemies[i].active = 0;
+      player_take_damage();
+      continue;
+    }
 
     enemies[i].anim++;
     if (enemies[i].anim >= 60) enemies[i].anim = 0;
