@@ -1,4 +1,5 @@
 // src/bullets.c
+#include "game.h"
 #include "bullets.h"
 #include "enemies.h"
 #include "player.h"
@@ -86,7 +87,10 @@ void player_bullets_update_collide_draw(void) {
                 bullets[bi].active = 0;
 
                 if (enemies[(unsigned char)ei].hp) enemies[(unsigned char)ei].hp--;
-                if (enemies[(unsigned char)ei].hp == 0) enemies[(unsigned char)ei].active = 0;
+                if (enemies[(unsigned char)ei].hp == 0) {
+                    enemies[(unsigned char)ei].active = 0;
+                    score_add(100);
+                }
 
                 break;
             }
@@ -110,7 +114,7 @@ void enemy_bullets_update_collide_draw(void) {
             ebullets[bi].active = 0;
             continue;
         }
-        
+
         // collide with player
         if (!player_is_invincible() && check_collision(&ebullets[bi], &wizard)) {
             ebullets[bi].active = 0;

@@ -19,6 +19,7 @@
 #define LANES 16
 #define LANE_SHIFT 4  // 16px lanes
 
+
 // structs
 typedef struct {
   unsigned char x, y, width, height;
@@ -44,5 +45,11 @@ typedef struct {
   signed char vx, vy;
   unsigned char active;
 } EnemyFireball;
+
+extern unsigned int score;
+
+void score_add(unsigned int amount);
+void score_reset(void);
+
 
 #endif

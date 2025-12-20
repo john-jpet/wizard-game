@@ -10,6 +10,7 @@
 #include "enemies.h"
 #include "bullets.h"
 #include "gfx.h"
+#include "hud.h"
 
 typedef enum {
   STATE_PLAY = 0,
@@ -20,18 +21,19 @@ static GameState state;
 
 static unsigned char enemycounter;
 static unsigned char last_hp;
+static unsigned char last_score;
 
 static unsigned char rand_range(unsigned char min, unsigned char max) {
   return (unsigned char)(min + (rand8() % (max - min + 1)));
 }
 
-static void draw_hud_hp(unsigned char hp) {
+/*static void draw_hud_hp(unsigned char hp) {
   // "HP:" at (1,1) and digit at (4,1)
   one_vram_buffer('H', NTADR_A(1, 1));
   one_vram_buffer('P', NTADR_A(2, 1));
   one_vram_buffer(':', NTADR_A(3, 1));
   one_vram_buffer((unsigned char)('0' + hp), NTADR_A(4, 1));
-}
+}*/
 
 static void show_game_over(void) {
   // Only call once on transition into GAMEOVER
@@ -43,6 +45,8 @@ static void reset_gameplay(void) {
   ebullets_init();
   enemies_init();
   player_init();
+  score_reset();
+  hud_init();
 
   enemycounter = 0;
   last_hp = 255;     // force HUD redraw
@@ -129,9 +133,14 @@ void main(void) {
       // -------- HUD (only if changed) --------
       hp = player_get_hp();
       if (hp != last_hp) {
-        draw_hud_hp(hp);
+        hud_set_hp(hp);
+		hud_set_mp(4); // for testing
         last_hp = hp;
       }
+	  if (score != last_score) {
+		hud_set_score(score);
+		last_score = score;
+	  }
 
       // -------- DRAW --------
       enemies_draw();

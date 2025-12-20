@@ -86,7 +86,7 @@ const unsigned char diveimp1[]={
 
 // Palette data
 const unsigned char palette_bg[]={
-0x0f, 0x00, 0x10, 0x30, // black, gray, lt gray, white
+0x0f, 0x27, 0x16, 0x30, // black, gray, lt gray, white
 0,0,0,0,
 0,0,0,0,
 0,0,0,0
