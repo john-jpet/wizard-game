@@ -11,11 +11,52 @@
 #include "bullets.h"
 #include "gfx.h"
 
+typedef enum {
+  STATE_PLAY = 0,
+  STATE_GAMEOVER = 1
+} GameState;
+
+static GameState state;
 
 static unsigned char enemycounter;
+static unsigned char last_hp;
 
 static unsigned char rand_range(unsigned char min, unsigned char max) {
-  return min + (rand8() % (max - min + 1));
+  return (unsigned char)(min + (rand8() % (max - min + 1)));
+}
+
+static void draw_hud_hp(unsigned char hp) {
+  // "HP:" at (1,1) and digit at (4,1)
+  one_vram_buffer('H', NTADR_A(1, 1));
+  one_vram_buffer('P', NTADR_A(2, 1));
+  one_vram_buffer(':', NTADR_A(3, 1));
+  one_vram_buffer((unsigned char)('0' + hp), NTADR_A(4, 1));
+}
+
+static void show_game_over(void) {
+  // Only call once on transition into GAMEOVER
+  multi_vram_buffer_horz("GAME OVER", 9, NTADR_A(10, 14));
+}
+
+static void reset_gameplay(void) {
+  bullets_init();
+  ebullets_init();
+  enemies_init();
+  player_init();
+
+  enemycounter = 0;
+  last_hp = 255;     // force HUD redraw
+  state = STATE_PLAY;
+
+  // Clear the screen once at reset (optional but nice)
+  ppu_off();
+  vram_adr(NAMETABLE_A);
+  vram_fill(0x00, 1024);
+  ppu_on_all();
+
+  // Make sure buffer is active/empty
+  set_vram_buffer();
+  clear_vram_buffer();
 }
 
 static void boot_screen(void) {
@@ -25,24 +66,14 @@ static void boot_screen(void) {
   set_vram_buffer();
   clear_vram_buffer();
 
+  // clear nametable at boot
   vram_adr(NAMETABLE_A);
   vram_fill(0x00, 1024);
-
-  // init systems
-  bullets_init();
-  ebullets_init();
-  enemies_init();
-  player_init();
 
   // graphics setup
   pal_bg(palette_bg);
   pal_spr(palette_sp);
   bank_spr(1);
-
-  // TEXT TEMPORARILY DISABLED
-//   vram_adr(NTADR_A(1,1));
-//   vram_write(text, sizeof(text));
-	
 
   ppu_on_all();
 
@@ -53,72 +84,75 @@ static void boot_screen(void) {
     if (p) break;
   }
 
-  // seed RNG using frame count at this moment
-  
   seed_rng();
 
-//   TEXT TEMPORARILY DISABLED
-//   vram_adr(NTADR_A(1,1));
-//   vram_fill(0x00, sizeof(text));
+  reset_gameplay();
 
-  enemycounter = 0;
-  ppu_wait_nmi();                 // ensure vblank
-  
-}
-static unsigned char game_over_shown = 0;
-
-static void show_game_over(void) {
-  clear_vram_buffer();                 // wipe queued updates for this frame
-  one_vram_buffer('0', NTADR_A(4,1));
-  multi_vram_buffer_horz("GAME OVER", 9, NTADR_A(10, 14));
-  game_over_shown = 1;
+  // ensure vblank after the ppu_off/ppu_on work
+  ppu_wait_nmi();
 }
 
 void main(void) {
+  unsigned char hp;
+  unsigned char p;
+
   boot_screen();
-  
 
   while (1) {
     ppu_wait_nmi();
-	clear_vram_buffer();    // IMPORTANT: prevents “stuck” writes
-
-	one_vram_buffer('H', NTADR_A(1,1));
-	one_vram_buffer('P', NTADR_A(2,1));
-	one_vram_buffer(':', NTADR_A(3,1));
-	one_vram_buffer('0' + player_get_hp(), NTADR_A(4,1));
-	if (player_is_dead()) {
-		
-		if (!game_over_shown) show_game_over();
-
-		// Optional: stop gameplay updates, but keep drawing the player/enemies if you want
-		// If you want a hard freeze, just loop waiting for NMI:
-		while (1) { ppu_wait_nmi(); }
-    }
     oam_clear();
-	
 
+    // Always start each frame with a clean buffer.
+    // (You can remove this later if you’re careful to not overflow.)
+    clear_vram_buffer();
 
-    // -------- UPDATE --------
-    player_update();
+    if (state == STATE_PLAY) {
 
-    enemycounter++;
-    if (enemycounter == 120) {
-      spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 1);
+      // -------- UPDATE --------
+      player_update();
+
+      enemycounter++;
+      if (enemycounter == 120) {
+        spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 1);
+      }
+      if (enemycounter == 240) {
+        enemycounter = 0;
+        spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 0);
+      }
+
+      enemies_update();
+      build_lane_enemy_table();
+
+      player_bullets_update_collide_draw();
+      enemy_bullets_update_collide_draw();
+
+      // -------- HUD (only if changed) --------
+      hp = player_get_hp();
+      if (hp != last_hp) {
+        draw_hud_hp(hp);
+        last_hp = hp;
+      }
+
+      // -------- DRAW --------
+      enemies_draw();
+      player_draw();
+
+      if (player_is_dead()) {
+        show_game_over();
+        state = STATE_GAMEOVER;
+      }
+
+    } else { // STATE_GAMEOVER
+
+      // keep showing last frame sprites? (optional)
+      enemies_draw();
+      player_draw();
+
+      // restart on START
+      p = pad_poll(0);
+      if (p & PAD_START) {
+        reset_gameplay();
+      }
     }
-    if (enemycounter == 240) {
-      enemycounter = 0;
-      spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 0);
-    }
-
-    enemies_update();
-    build_lane_enemy_table();
-
-    // bullets handle update + collision + draw internally
-    player_bullets_update_collide_draw();
-    enemy_bullets_update_collide_draw();
-
-    // -------- DRAW --------
-    enemies_draw();
-    player_draw();
   }
 }
