@@ -22,6 +22,7 @@ cc65 -Oirs -I include src\bullets.c --add-source -o build\bullets.s
 cc65 -Oirs -I include src\gfx.c     --add-source -o build\gfx.s
 cc65 -Oirs -I include src\hud.c --add-source -o build\hud.s
 cc65 -Oirs -I include src\game.c   --add-source -o build\game.s
+cc65 -Oirs -I include src\pickup.c --add-source -o build\pickup.s
 
 REM ---- assemble ----
 ca65 lib\crt0.s        -o build\crt0.o
@@ -32,11 +33,12 @@ ca65 build\bullets.s -g -o build\bullets.o
 ca65 build\gfx.s    -g -o build\gfx.o
 ca65 build\hud.s -g -o build\hud.o
 ca65 build\game.s   -g -o build\game.o
+ca65 build\pickup.s -g -o build\pickup.o
 
 REM ---- link ----
 ld65 -C cfg\nrom_32k_vert.cfg ^
   -o build\%name%.nes ^
-  build\crt0.o build\main.o build\player.o build\enemies.o build\bullets.o build\gfx.o build\hud.o build\game.o ^
+  build\crt0.o build\main.o build\player.o build\enemies.o build\bullets.o build\gfx.o build\hud.o build\game.o build\pickup.o ^
   "%CC65_HOME%\lib\nes.lib" ^
   -Ln build\labels.txt --dbgfile build\dbg.txt
 

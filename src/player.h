@@ -13,8 +13,12 @@ void player_draw(void);   // draws wizard metasprite
 
 // health
 unsigned char player_get_hp(void);
+unsigned char player_get_mp(void);
 unsigned char player_is_dead(void);
 unsigned char player_is_invincible(void);
 void player_take_damage(void);
+void player_heal(void);
+void player_add_mp(unsigned char amount);
+void player_use_mp(unsigned char amount);
 
 #endif

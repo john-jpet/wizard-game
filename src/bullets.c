@@ -3,6 +3,7 @@
 #include "bullets.h"
 #include "enemies.h"
 #include "player.h"
+#include "pickup.h"
 
 Fireball bullets[MAX_BULLETS];
 EnemyFireball ebullets[MAX_BULLETS];
@@ -57,6 +58,17 @@ static unsigned char bullet_lane_from_center(unsigned char bx) {
     return (unsigned char)((bx + 4) >> LANE_SHIFT);
 }
 
+unsigned char roll_drop_pickup(void) {
+    unsigned char r = rand8();
+
+  // star rarer than heart
+  if ((r & (DROP_STAR_CHANCE - 1)) == 0) return 2;  // 1/16 if DROP_STAR_CHANCE=16
+  if ((r & (DROP_HEART_CHANCE - 1)) == 0) return 1; // 1/8  if DROP_HEART_CHANCE=8
+  return 0;
+
+}
+
+unsigned char d;
 void player_bullets_update_collide_draw(void) {
     unsigned char bi;
     signed char ei;
@@ -89,6 +101,9 @@ void player_bullets_update_collide_draw(void) {
                 if (enemies[(unsigned char)ei].hp) enemies[(unsigned char)ei].hp--;
                 if (enemies[(unsigned char)ei].hp == 0) {
                     enemies[(unsigned char)ei].active = 0;
+                    d = roll_drop_pickup();
+                    if (d == 1) spawn_pickup(enemies[(unsigned char)ei].x + 4, enemies[(unsigned char)ei].y, 0);
+                    else if (d == 2) spawn_pickup(enemies[(unsigned char)ei].x + 4, enemies[(unsigned char)ei].y, 1);
                     score_add(100);
                 }
 

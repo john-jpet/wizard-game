@@ -11,6 +11,7 @@
 #include "bullets.h"
 #include "gfx.h"
 #include "hud.h"
+#include "pickup.h"
 
 typedef enum {
   STATE_TITLE = 0,
@@ -24,8 +25,10 @@ static unsigned char state_just_entered;
 static unsigned char enemycounter;
 static unsigned char last_hp;
 static unsigned int last_score;
+static unsigned int last_mp;
 
 static unsigned char hp;
+static unsigned char mp;
 
 static unsigned char rand_range(unsigned char min, unsigned char max) {
   return (unsigned char)(min + (rand8() % (max - min + 1)));
@@ -87,6 +90,7 @@ static void enter_play(void) {
   clear_vram_buffer();
   hud_init();
   last_hp = 255;     // force HUD redraw
+  last_mp = 255;     // force HUD redraw
   last_score = 0xFFFFFFFF;
 }
 
@@ -121,19 +125,23 @@ static void update_play(void) {
 
   player_bullets_update_collide_draw();
   enemy_bullets_update_collide_draw();
+  pickups_update_draw();
 
   // HUD update (only when dirty ideally, but minimal is fine)
   hp = player_get_hp();
   if(hp != last_hp) {
-	last_hp = hp;
-	hud_set_hp(hp);
+    last_hp = hp;
+    hud_set_hp(hp);
   }
   if(score != last_score) {
-	last_score = score;
-	hud_set_score(score);
+    last_score = score;
+    hud_set_score(score);
   }
-  
-  hud_set_mp(4); // placeholder for now
+  mp = player_get_mp();
+  if(mp != last_mp) {
+    last_mp = mp;
+    hud_set_mp(mp);
+  }
 
   if (player_is_dead()) {
     set_state(STATE_GAMEOVER);
@@ -151,6 +159,7 @@ static void draw_play(void) {
   //oam_clear();
   enemies_draw();
   player_draw();
+  
 }
 
 
