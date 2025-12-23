@@ -21,5 +21,7 @@ extern const unsigned char imp1[];
 extern const unsigned char diveimp[];
 extern const unsigned char diveimp1[];
 
+extern const unsigned char large_bullet[];
+
 
 #endif

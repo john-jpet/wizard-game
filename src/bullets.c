@@ -4,15 +4,18 @@
 #include "enemies.h"
 #include "player.h"
 #include "pickup.h"
+#include "gfx.h"
 
 Fireball bullets[MAX_BULLETS];
 EnemyFireball ebullets[MAX_BULLETS];
+Fireball superbullet;
 
 void bullets_init(void) {
     unsigned char i;
     for (i = 0; i < MAX_BULLETS; i++) {
         bullets[i].active = 0;
     }
+    superbullet.active = 0;
 }
 
 void ebullets_init(void) {
@@ -20,6 +23,7 @@ void ebullets_init(void) {
     for (i = 0; i < MAX_BULLETS; i++) {
         ebullets[i].active = 0;
     }
+    
 }
 
 void fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char vy) {
@@ -37,6 +41,19 @@ void fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char v
         }
     }
 }
+
+void fire_super(unsigned char x, unsigned char y, signed char vx, signed char vy) {
+  if (superbullet.active) return;
+
+  superbullet.active = 1;
+  superbullet.x = x;
+  superbullet.y = y;
+  superbullet.width = 16;
+  superbullet.height = 16;
+  superbullet.vx = vx;
+  superbullet.vy = vy;
+}
+
 
 void enemy_fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char vy) {
     unsigned char i;
@@ -80,6 +97,7 @@ void player_bullets_update_collide_draw(void) {
         if (!bullets[bi].active) continue;
 
         bullets[bi].y += bullets[bi].vy;
+        bullets[bi].x += bullets[bi].vx;
 
         if (bullets[bi].y < 0x10) {
             bullets[bi].active = 0;
@@ -116,6 +134,41 @@ void player_bullets_update_collide_draw(void) {
         }
     }
 }
+
+void super_update_collide_draw(void) {
+  signed char ei;
+  unsigned char lane, l2;
+
+  if (!superbullet.active) return;
+
+  superbullet.y += superbullet.vy;
+  superbullet.x += superbullet.vx;
+
+  if (superbullet.y < 0x10) {
+    superbullet.active = 0;
+    return;
+  }
+
+  lane = (unsigned char)((superbullet.x + 8) >> LANE_SHIFT); // 16px wide -> +8 center 
+  for (l2 = (lane ? lane - 1 : lane); l2 <= lane + 1 && l2 < LANES; l2++) {
+    ei = lane_enemy[l2];
+    if (ei < 0) continue;
+
+    if (check_collision(&superbullet, &enemies[(unsigned char)ei])) {
+      // kill enemy, but KEEP super active (pierce)
+      enemies[(unsigned char)ei].active = 0;
+      score_add(100); // optional reward
+      // don't break if you want it to potentially hit another candidate next frame
+      // BUT: lane_enemy table probably still points to the killed enemy until rebuilt
+      // so breaking here is fine; next frame table updates.
+      break;
+    }
+  }
+
+  // draw 16x16 metasprite (recommended) or 4 sprites
+  oam_meta_spr(superbullet.x, superbullet.y, large_bullet);
+}
+
 
 void enemy_bullets_update_collide_draw(void) {
     unsigned char bi;

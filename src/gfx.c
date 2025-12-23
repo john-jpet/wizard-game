@@ -84,6 +84,15 @@ const unsigned char diveimp1[]={
 	128
 };
 
+const unsigned char large_bullet[]={
+	  0,  0,0x42,1|OAM_FLIP_H,
+	  0,  8,0x43,1|OAM_FLIP_H,
+	  8,  0,0x42,1,
+	  8,  8,0x43,1,
+	128
+};
+
+
 // Palette data
 const unsigned char palette_bg[]={
 0x0f, 0x27, 0x16, 0x30, // black, gray, lt gray, white

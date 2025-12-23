@@ -124,6 +124,7 @@ static void update_play(void) {
   build_lane_enemy_table();
 
   player_bullets_update_collide_draw();
+  super_update_collide_draw();
   enemy_bullets_update_collide_draw();
   pickups_update_draw();
 
@@ -163,28 +164,7 @@ static void draw_play(void) {
 }
 
 
-/*static void reset_gameplay(void) {
-  bullets_init();
-  ebullets_init();
-  enemies_init();
-  player_init();
-  score_reset();
-  hud_init();
 
-  enemycounter = 0;
-  last_hp = 255;     // force HUD redraw
-  state = STATE_PLAY;
-
-  // Clear the screen once at reset (optional but nice)
-  ppu_off();
-  vram_adr(NAMETABLE_A);
-  vram_fill(0x00, 1024);
-  ppu_on_all();
-
-  // Make sure buffer is active/empty
-  set_vram_buffer();
-  clear_vram_buffer();
-}*/
 
 static void boot_screen(void) {
 
