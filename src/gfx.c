@@ -85,10 +85,10 @@ const unsigned char diveimp1[]={
 };
 
 const unsigned char large_bullet[]={
-	  0,  0,0x42,1|OAM_FLIP_H,
-	  0,  8,0x43,1|OAM_FLIP_H,
-	  8,  0,0x42,1,
-	  8,  8,0x43,1,
+	  0,  0,0x24,1|OAM_FLIP_H,
+	  0,  8,0x34,1|OAM_FLIP_H,
+	  8,  0,0x24,1,
+	  8,  8,0x34,1,
 	128
 };
 

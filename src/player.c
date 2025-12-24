@@ -34,7 +34,7 @@ static void animate_wizard(void) {
     } else {
         animtimer = 0;
         animframe = 0;
-        if (pad & PAD_B) oam_meta_spr(wizard.x, wizard.y, wizardfire);
+        if (pad & PAD_B || pad & PAD_A) oam_meta_spr(wizard.x, wizard.y, wizardfire);
         else            oam_meta_spr(wizard.x, wizard.y, wizardstand);
     }
 }
@@ -65,6 +65,11 @@ void player_update(void) {
 
     if (pad_new & PAD_B) {
         fire_bullet(wizard.x + 4, wizard.y + 8, 0, -4);
+    }
+    if(pad_new & PAD_A) {
+        if(mp >= 1) {
+            fire_super(wizard.x, wizard.y, 0, -2);
+        }
     }
 
     if (pad & PAD_LEFT)  { wizard.x -= 2; moving = 1; right = 0; }
@@ -104,4 +109,10 @@ void player_heal(void) {
 void player_add_mp(unsigned char amount) {
     mp += amount;
     if (mp > 5) mp = 5; // max mp
+}
+
+void player_use_mp(unsigned char amount) {
+    if (mp >= amount) {
+        mp -= amount;
+    }
 }

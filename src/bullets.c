@@ -44,7 +44,7 @@ void fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char v
 
 void fire_super(unsigned char x, unsigned char y, signed char vx, signed char vy) {
   if (superbullet.active) return;
-
+  player_use_mp(1);
   superbullet.active = 1;
   superbullet.x = x;
   superbullet.y = y;
@@ -163,6 +163,7 @@ void super_update_collide_draw(void) {
       // so breaking here is fine; next frame table updates.
       break;
     }
+    oam_meta_spr(superbullet.x, superbullet.y, large_bullet);
   }
 
   // draw 16x16 metasprite (recommended) or 4 sprites
