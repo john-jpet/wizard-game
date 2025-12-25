@@ -19,6 +19,17 @@ void enemies_init(void) {
   for (i = 0; i < MAX_ENEMIES; i++) enemies[i].active = 0;
 }
 
+void kill_all_enemies(void) {
+  unsigned char i;
+  for (i = 0; i < MAX_ENEMIES; i++) enemies[i].active = 0;
+}
+
+void clear_enemy_bullets(void) {
+  unsigned char i;
+  for (i = 0; i < MAX_BULLETS; i++) ebullets[i].active = 0;
+}
+
+
 void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
   unsigned char i;
   for (i = 0; i < MAX_ENEMIES; i++) {

@@ -51,5 +51,7 @@ extern unsigned int score;
 void score_add(unsigned int amount);
 void score_reset(void);
 
+void nuke_trigger(void);
+void nuke_update_fx(void);
 
 #endif

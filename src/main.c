@@ -127,6 +127,7 @@ static void update_play(void) {
   super_update_collide_draw();
   enemy_bullets_update_collide_draw();
   pickups_update_draw();
+  nuke_update_fx();
 
   // HUD update (only when dirty ideally, but minimal is fine)
   hp = player_get_hp();

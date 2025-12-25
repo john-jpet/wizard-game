@@ -14,6 +14,8 @@ void enemies_init(void);
 void spawn_enemy(unsigned char x, unsigned char y, unsigned char type);
 void enemies_update(void);
 void enemies_draw(void);
+void kill_all_enemies(void);
+void clear_enemy_bullets(void);
 
 // collision helper table (called once per frame, after enemies_update)
 void build_lane_enemy_table(void);
