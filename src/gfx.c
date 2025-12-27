@@ -1,4 +1,5 @@
-
+// src/gfx.c
+/* Graphics data: sprites and palettes */
 #include "gfx.h"
 #include "game.h"
 // Enemy structure
@@ -84,6 +85,14 @@ const unsigned char diveimp1[]={
 	128
 };
 
+const unsigned char warlock[]={
+	  0,  0,0x42,3|OAM_FLIP_H,
+	  0,  8,0x52,3|OAM_FLIP_H,
+	  8,  0,0x42,3,
+	  8,  8,0x52,3,
+	128
+};
+
 const unsigned char large_bullet[]={
 	  0,  0,0x24,1|OAM_FLIP_H,
 	  0,  8,0x34,1|OAM_FLIP_H,
@@ -104,7 +113,7 @@ const unsigned char palette_bg[]={
 const unsigned char palette_sp[]={
 0x0f, 0x02, 0x27, 0x36, // black, blue, yellow, apricot
 0x0f, 0x06, 0x16, 0x27, // black, dark red, light red, yellow
-0x0f,0x03,0x13,0x23,  // black, dark purple, purple, light purple
-0,0,0,0
+0x0f,0x0c,0x1c,0x3c,  // black, dark purple, purple, light purple
+0x0f,0x03,0x13,0x33
 }; 
 

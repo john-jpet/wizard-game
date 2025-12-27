@@ -1,4 +1,5 @@
 // src/player.c
+/* Player management: input, movement, drawing, health/mana */
 #include "player.h"
 #include "bullets.h"
 #include "neslib.h"

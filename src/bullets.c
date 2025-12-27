@@ -1,4 +1,5 @@
 // src/bullets.c
+/* Bullet management and collision detection */
 #include "game.h"
 #include "bullets.h"
 #include "enemies.h"
@@ -99,6 +100,7 @@ void player_bullets_update_collide_draw(void) {
         bullets[bi].y += bullets[bi].vy;
         bullets[bi].x += bullets[bi].vx;
 
+        // Early exit if off-screen
         if (bullets[bi].y < 0x10) {
             bullets[bi].active = 0;
             continue;
@@ -106,12 +108,16 @@ void player_bullets_update_collide_draw(void) {
 
         lane = bullet_lane_from_center(bullets[bi].x);
 
-        for (l2 = (lane ? (unsigned char)(lane - 1) : lane);
-             l2 <= (unsigned char)(lane + 1) && l2 < LANES;
+        // Check ONLY closest lanes (optimize bounds)
+        for (l2 = (lane > 0 ? lane - 1 : 0);
+             l2 <= lane + 1 && l2 < LANES;
              l2++) {
 
             ei = lane_enemy[l2];
             if (ei < 0) continue;
+            
+            // Quick active check before expensive collision
+            if (!enemies[(unsigned char)ei].active) continue;
 
             if (check_collision((Sprite*)&bullets[bi], (Sprite*)&enemies[(unsigned char)ei])) {
                 bullets[bi].active = 0;
@@ -122,13 +128,14 @@ void player_bullets_update_collide_draw(void) {
                     d = roll_drop_pickup();
                     if (d == 1) spawn_pickup(enemies[(unsigned char)ei].x + 4, enemies[(unsigned char)ei].y, 0);
                     else if (d == 2) spawn_pickup(enemies[(unsigned char)ei].x + 4, enemies[(unsigned char)ei].y, 1);
-                    score_add(100);
+                    score_add(ENEMY_KILL_SCORE);
                 }
 
                 break;
             }
         }
 
+        // Draw AFTER collision (skip if bullet died)
         if (bullets[bi].active) {
             oam_spr(bullets[bi].x, bullets[bi].y, BULLET_TILE, BULLET_PAL);
         }
@@ -150,23 +157,22 @@ void super_update_collide_draw(void) {
   }
 
   lane = (unsigned char)((superbullet.x + 8) >> LANE_SHIFT); // 16px wide -> +8 center 
-  for (l2 = (lane ? lane - 1 : lane); l2 <= lane + 1 && l2 < LANES; l2++) {
+  for (l2 = (lane > 0 ? lane - 1 : 0); l2 <= lane + 1 && l2 < LANES; l2++) {
     ei = lane_enemy[l2];
     if (ei < 0) continue;
+    
+    // Add active check
+    if (!enemies[(unsigned char)ei].active) continue;
 
     if (check_collision(&superbullet, &enemies[(unsigned char)ei])) {
       // kill enemy, but KEEP super active (pierce)
       enemies[(unsigned char)ei].active = 0;
-      score_add(100); // optional reward
-      // don't break if you want it to potentially hit another candidate next frame
-      // BUT: lane_enemy table probably still points to the killed enemy until rebuilt
-      // so breaking here is fine; next frame table updates.
+      score_add(ENEMY_KILL_SCORE);
       break;
     }
-    oam_meta_spr(superbullet.x, superbullet.y, large_bullet);
   }
 
-  // draw 16x16 metasprite (recommended) or 4 sprites
+  // draw 16x16 metasprite ONCE per frame
   oam_meta_spr(superbullet.x, superbullet.y, large_bullet);
 }
 

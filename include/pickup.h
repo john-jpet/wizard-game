@@ -1,4 +1,4 @@
-
+// include/pickup.h
 #ifndef PICKUP_H
 #define PICKUP_H
 
@@ -14,6 +14,7 @@ typedef struct {
   unsigned char height;
   unsigned char active;
   unsigned char type;  // 0 = heart, 1 = star
+  unsigned char _padding[2];  // Pad to 8 bytes for fast array access
 } Pickup;
 
 extern Pickup pickups[MAX_PICKUPS];

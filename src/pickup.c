@@ -1,4 +1,5 @@
-
+// src/pickup.c
+/* Pickup management and collision detection */
 #include "pickup.h"
 #include "game.h"
 #include "player.h"
@@ -44,7 +45,7 @@ void pickups_update_draw(void) {
         player_heal();
       } else if(pickups[i].type == 1) {
         player_add_mp(1);
-        score_add(500);
+        score_add(STAR_PICKUP_SCORE);
       }
       continue;
     }

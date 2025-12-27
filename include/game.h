@@ -19,6 +19,12 @@
 #define LANES 16
 #define LANE_SHIFT 4  // 16px lanes
 
+// Game balance constants
+#define ENEMY_KILL_SCORE 100
+#define STAR_PICKUP_SCORE 500
+#define NUKE_MP_COST 3
+#define NUKE_FLASH_DURATION 12
+
 
 // structs
 typedef struct {
@@ -32,18 +38,22 @@ typedef struct {
   unsigned char active;
   unsigned char anim;
   unsigned char type;
+  unsigned char move_counter;
+  unsigned char _padding[5];  // Pad to 16 bytes for fast array access
 } Enemy;
 
 typedef struct {
   unsigned char x, y, width, height;
   signed char vx, vy;
   unsigned char active;
+  unsigned char _padding;  // Pad to 8 bytes for fast array access
 } Fireball;
 
 typedef struct {
   unsigned char x, y, width, height;
   signed char vx, vy;
   unsigned char active;
+  unsigned char _padding;  // Pad to 8 bytes for fast array access
 } EnemyFireball;
 
 extern unsigned int score;

@@ -1,8 +1,11 @@
-
+// src/game.c
+/* Game state management and global functions */
 #include "game.h"
 #include "enemies.h"
 #include "player.h"
 #include "gfx.h"
+#include "bullets.h"
+#include "pickup.h"
 
 unsigned int score = 0;
 
@@ -32,12 +35,27 @@ static const unsigned char flash_palette_sp[] = {
 };
 
 void nuke_trigger(void) {
+  unsigned char i;
+  unsigned char d;
+  
   if (nuke_timer) return;        // already nuking
-  nuke_timer = 12;               // effect lasts 12 frames
+  nuke_timer = NUKE_FLASH_DURATION;
 
-  kill_all_enemies();
+  // Kill each enemy properly (with score and pickups)
+  for (i = 0; i < MAX_ENEMIES; i++) {
+    if (enemies[i].active) {
+      enemies[i].active = 0;
+      score_add(ENEMY_KILL_SCORE);
+      
+      // Roll for pickup drops
+      d = roll_drop_pickup();
+      if (d == 1) spawn_pickup(enemies[i].x + 4, enemies[i].y, 0);      // heart
+      else if (d == 2) spawn_pickup(enemies[i].x + 4, enemies[i].y, 1); // star
+    }
+  }
+  
   clear_enemy_bullets();
-  player_use_mp(3);
+  player_use_mp(NUKE_MP_COST);
 }
 
 void nuke_update_fx(void) {

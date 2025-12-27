@@ -1,4 +1,4 @@
-/*
+/* src/main.c
  * Wizard's Stand: Defender of the Realm (NES)
  * Author: John Petruzziello
  *
@@ -12,6 +12,10 @@
 #include "gfx.h"
 #include "hud.h"
 #include "pickup.h"
+
+// Game timing constants
+#define ENEMY_SPAWN_FAST 120   // frames until fast enemy spawns
+#define ENEMY_SPAWN_SLOW 240   // frames until slow enemy spawns
 
 typedef enum {
   STATE_TITLE = 0,
@@ -34,13 +38,6 @@ static unsigned char rand_range(unsigned char min, unsigned char max) {
   return (unsigned char)(min + (rand8() % (max - min + 1)));
 }
 
-/*static void draw_hud_hp(unsigned char hp) {
-  // "HP:" at (1,1) and digit at (4,1)
-  one_vram_buffer('H', NTADR_A(1, 1));
-  one_vram_buffer('P', NTADR_A(2, 1));
-  one_vram_buffer(':', NTADR_A(3, 1));
-  one_vram_buffer((unsigned char)('0' + hp), NTADR_A(4, 1));
-}*/
 static void set_state(GameState s) {
   state = s;
   state_just_entered = 1;
@@ -79,6 +76,7 @@ static void enter_play(void) {
   ebullets_init();
   enemies_init();
   player_init();
+  pickups_init();
   score_reset();
   
 
@@ -112,15 +110,15 @@ static void update_play(void) {
   player_update();
 
   enemycounter++;
-  if (enemycounter == 120) {
+  if (enemycounter == ENEMY_SPAWN_FAST) {
     spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 1);
   }
-  if (enemycounter == 240) {
+  if (enemycounter == ENEMY_SPAWN_SLOW) {
     enemycounter = 0;
     spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 0);
   }
 
-  enemies_update();
+  enemies_update_and_draw();
   build_lane_enemy_table();
 
   player_bullets_update_collide_draw();
@@ -129,7 +127,7 @@ static void update_play(void) {
   pickups_update_draw();
   nuke_update_fx();
 
-  // HUD update (only when dirty ideally, but minimal is fine)
+  // HUD update (only when dirty)
   hp = player_get_hp();
   if(hp != last_hp) {
     last_hp = hp;
@@ -158,17 +156,13 @@ static void update_gameover(void) {
 }
 
 static void draw_play(void) {
-  //oam_clear();
-  enemies_draw();
   player_draw();
-  
 }
 
 
 
 
 static void boot_screen(void) {
-
   ppu_off();
   set_vram_buffer();
   clear_vram_buffer();
@@ -183,10 +177,6 @@ static void boot_screen(void) {
   bank_spr(1);
 
   ppu_on_all();
-
-  
-
-  //reset_gameplay();
 
   // ensure vblank after the ppu_off/ppu_on work
   ppu_wait_nmi();
