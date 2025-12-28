@@ -38,7 +38,12 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
       enemies[i].height = 16;
       enemies[i].vx = 0;
       enemies[i].vy = 0;
-      enemies[i].hp = (type == 0) ? 3 : 1;
+      // Type 0 (slow imp): 3 HP
+      // Type 1 (fast imp): 1 HP
+      // Type 2 (warlock): 5 HP
+      if (type == 0) enemies[i].hp = 3;
+      else if (type == 2) enemies[i].hp = 5;
+      else enemies[i].hp = 1;
       enemies[i].anim = rand8() % ANIM_CYCLE;
       enemies[i].type = type;
       enemies[i].move_counter = 0;
@@ -49,16 +54,28 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
 
 void enemies_update_and_draw(void) {
   unsigned char i;
+  unsigned char is_firing;
+  
   for (i = 0; i < MAX_ENEMIES; i++) {
     if (!enemies[i].active) continue;
 
     // UPDATE: Frame-based movement for fractional speeds
     enemies[i].move_counter++;
     
-    // Type 0 (slow): move 1 pixel every 2 frames = 0.5 pixels/frame
-    // Type 1 (fast): move 1 pixel every frame = 1 pixel/frame
+    // Check if warlock is currently in firing animation
+    is_firing = (enemies[i].type == 2 && enemies[i].anim >= 25 && enemies[i].anim <= 55);
+    
+    // Type 0 (slow): move 1 pixel every 2 frames = 0.5 px/frame
+    // Type 1 (fast): move 1 pixel every frame = 1 px/frame
+    // Type 2 (warlock): move 1 pixel every 3 frames = 0.33 px/frame, STOP when firing
     if (enemies[i].type == 0) {
       if (enemies[i].move_counter >= 2) {
+        enemies[i].y++;
+        enemies[i].move_counter = 0;
+      }
+    } else if (enemies[i].type == 2) {
+      // Warlock: stops moving when firing
+      if (!is_firing && enemies[i].move_counter >= 3) {
         enemies[i].y++;
         enemies[i].move_counter = 0;
       }
@@ -76,12 +93,23 @@ void enemies_update_and_draw(void) {
     enemies[i].anim++;
     if (enemies[i].anim >= ANIM_CYCLE) enemies[i].anim = 0;
 
-    if (enemies[i].anim == ANIM_SWITCH && enemies[i].type == 0) {
-      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 8, 0, 3);
+    // Fire bullets at specific animation frames
+    if (enemies[i].anim == ANIM_SWITCH) {
+      if (enemies[i].type == 0) {
+        enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 8, 0, 3);
+      } else if (enemies[i].type == 2) {
+        // Warlock fires 3 bullets in a spread
+        enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 8, -1, 3);
+        enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 8, 0, 3);
+        enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 8, 1, 3);
+      }
     }
     
     // DRAW: Combined in same loop to save iteration overhead
-    if (enemies[i].anim < ANIM_SWITCH) {
+    if (enemies[i].type == 2) {
+      // Warlock always uses same sprite
+      oam_meta_spr(enemies[i].x, enemies[i].y, warlock);
+    } else if (enemies[i].anim < ANIM_SWITCH) {
       if (enemies[i].type == 0) oam_meta_spr(enemies[i].x, enemies[i].y, imp);
       else                      oam_meta_spr(enemies[i].x, enemies[i].y, diveimp);
     } else {

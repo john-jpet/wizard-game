@@ -16,6 +16,7 @@
 // Game timing constants
 #define ENEMY_SPAWN_FAST 120   // frames until fast enemy spawns
 #define ENEMY_SPAWN_SLOW 240   // frames until slow enemy spawns
+#define ENEMY_SPAWN_WARLOCK 360 // frames until warlock spawns (6 seconds)
 
 typedef enum {
   STATE_TITLE = 0,
@@ -110,12 +111,17 @@ static void update_play(void) {
   player_update();
 
   enemycounter++;
+  
+  // Spawn enemies at different intervals (check in order: smallest to largest)
   if (enemycounter == ENEMY_SPAWN_FAST) {
     spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 1);
-  }
+  } 
   if (enemycounter == ENEMY_SPAWN_SLOW) {
-    enemycounter = 0;
     spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 0);
+  }
+  if (enemycounter >= ENEMY_SPAWN_WARLOCK) {
+    spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 2);
+    enemycounter = 0;  // Reset AFTER warlock spawns
   }
 
   enemies_update_and_draw();
