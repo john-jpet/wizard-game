@@ -27,7 +27,7 @@ typedef enum {
 static GameState state;
 static unsigned char state_just_entered;
 
-static unsigned char enemycounter;
+static unsigned int enemycounter;  // Changed to unsigned int to reach 360
 static unsigned char last_hp;
 static unsigned int last_score;
 static unsigned int last_mp;

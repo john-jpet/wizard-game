@@ -87,9 +87,25 @@ const unsigned char diveimp1[]={
 
 const unsigned char warlock[]={
 	  0,  0,0x42,3|OAM_FLIP_H,
-	  0,  8,0x52,3|OAM_FLIP_H,
+	  0,  8,0x51,3,
 	  8,  0,0x42,3,
 	  8,  8,0x52,3,
+	128
+};
+
+const unsigned char warlock_1[]={
+	  0,  0,0x44,3|OAM_FLIP_H,
+	  0,  8,0x53,3,
+	  8,  0,0x44,3,
+	  8,  8,0x54,3,
+	128
+};
+
+const unsigned char warlock_fire[]={
+	  0,  0,0x41,3|OAM_FLIP_H,
+	  0,  8,0x50,3|OAM_FLIP_H,
+	  8,  0,0x41,3,
+	  8,  8,0x50,3,
 	128
 };
 

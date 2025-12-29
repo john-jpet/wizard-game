@@ -23,6 +23,8 @@ extern const unsigned char diveimp[];
 extern const unsigned char diveimp1[];
 
 extern const unsigned char warlock[];
+extern const unsigned char warlock_1[];
+extern const unsigned char warlock_fire[];
 
 extern const unsigned char large_bullet[];
 
