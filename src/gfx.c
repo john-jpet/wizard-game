@@ -117,6 +117,21 @@ const unsigned char large_bullet[]={
 	128
 };
 
+const unsigned char fire_spirit[]={
+	  0, 0, 0x60, 1|OAM_FLIP_H,
+	  0, 8, 0x70, 1|OAM_FLIP_H,
+	  8, 0, 0x60, 1,
+	  8, 8, 0x70, 1,
+	128
+};
+
+const unsigned char slime_large[]={
+	  0, 0, 0x08, 2,
+	  0, 8, 0x18, 2,
+	  8, 0, 0x09, 2,
+	  8, 8, 0x19, 2,
+	128
+};
 
 // Palette data
 const unsigned char palette_bg[]={

@@ -26,6 +26,10 @@ extern const unsigned char warlock[];
 extern const unsigned char warlock_1[];
 extern const unsigned char warlock_fire[];
 
+extern const unsigned char fire_spirit[];
+
+extern const unsigned char slime_large[];
+
 extern const unsigned char large_bullet[];
 
 
