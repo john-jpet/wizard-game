@@ -10,7 +10,11 @@
 #define ANIM_SWITCH 30
 #define WARLOCK_ANIM_CYCLE 120  // Warlock has longer animation cycle
 #define WARLOCK_FIRE_FRAME 100   // Warlock fires at this frame
-#define WARLOCK_FIRE_DURATION 30 // Warlock stays in fire pose for 20 frames
+#define WARLOCK_FIRE_DURATION 30 // Warlock stays in fire pose for 30 frames
+
+// Screen boundaries for fire spirit weaving
+#define FIRE_SPIRIT_MIN_X 8
+#define FIRE_SPIRIT_MAX_X 232
 
 Enemy enemies[MAX_ENEMIES];
 signed char lane_enemy[LANES];
@@ -39,13 +43,16 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
       enemies[i].y = y;
       enemies[i].width = 16;
       enemies[i].height = 16;
-      enemies[i].vx = 0;
+      if(type == 3) enemies[i].vx = 1;  // fire spirit weaves
+      else enemies[i].vx = 0;
       enemies[i].vy = 0;
       // Type 0 (slow imp): 3 HP
       // Type 1 (fast imp): 1 HP
       // Type 2 (warlock): 5 HP
+      // Type 3 (fire spirit): 2 HP
       if (type == 0) enemies[i].hp = 3;
       else if (type == 2) enemies[i].hp = 5;
+      else if (type == 3) enemies[i].hp = 2;
       else enemies[i].hp = 1;
       enemies[i].anim = rand8() % ANIM_CYCLE;
       enemies[i].type = type;
@@ -62,6 +69,20 @@ void enemies_update_and_draw(void) {
   for (i = 0; i < MAX_ENEMIES; i++) {
     if (!enemies[i].active) continue;
 
+    // Fire spirit weaving logic (must happen before vertical movement)
+    if(enemies[i].type == 3) {
+      enemies[i].x += enemies[i].vx;
+      
+      // Bounce off screen edges with proper clamping
+      if (enemies[i].x <= FIRE_SPIRIT_MIN_X) {
+        enemies[i].x = FIRE_SPIRIT_MIN_X;
+        enemies[i].vx = 1;  // Move right
+      } else if (enemies[i].x >= FIRE_SPIRIT_MAX_X) {
+        enemies[i].x = FIRE_SPIRIT_MAX_X;
+        enemies[i].vx = -1;  // Move left
+      }
+    }
+
     // UPDATE: Frame-based movement for fractional speeds
     enemies[i].move_counter++;
     
@@ -70,7 +91,8 @@ void enemies_update_and_draw(void) {
     
     // Type 0 (slow): move 1 pixel every 2 frames = 0.5 px/frame
     // Type 1 (fast): move 1 pixel every frame = 1 px/frame
-    // Type 2 (warlock): move 1 pixel every 3 frames = 0.33 px/frame, STOP when firing
+    // Type 2 (warlock): move 1 pixel every 4 frames = 0.25 px/frame, STOP when firing
+    // Type 3 (fire spirit): move 1 pixel every 2 frames = 0.5 px/frame (while weaving at 1 px/frame)
     if (enemies[i].type == 0) {
       if (enemies[i].move_counter >= 2) {
         enemies[i].y++;
@@ -79,6 +101,12 @@ void enemies_update_and_draw(void) {
     } else if (enemies[i].type == 2) {
       // Warlock: stops moving when firing
       if (!is_firing && enemies[i].move_counter >= 4) {
+        enemies[i].y++;
+        enemies[i].move_counter = 0;
+      }
+    } else if (enemies[i].type == 3) {
+      // Fire spirit: moves down every 2 frames (same vertical speed as type 0, but weaves)
+      if (enemies[i].move_counter >= 2) {
         enemies[i].y++;
         enemies[i].move_counter = 0;
       }
@@ -104,12 +132,12 @@ void enemies_update_and_draw(void) {
 
     // Fire bullets at specific animation frames
     if (enemies[i].type == 0 && enemies[i].anim == ANIM_SWITCH) {
-      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 8, 0, 3);
+      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 8, 0, 3, ENEMY_PAL);
     } else if (enemies[i].type == 2 && enemies[i].anim == WARLOCK_FIRE_FRAME) {
-      // Warlock fires 3 bullets in a spread at frame 90 (out of 120)
-      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 8, -1, 3);
-      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 8, 0, 3);
-      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 8, 1, 3);
+      // Warlock fires 3 bullets in a spread at frame 100 (out of 120) with purple palette
+      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, -1, 2, WARLOCK_PAL);
+      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, 0, 2, WARLOCK_PAL);
+      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, 1, 2, WARLOCK_PAL);
     }
     
     // DRAW: Combined in same loop to save iteration overhead
@@ -121,6 +149,13 @@ void enemies_update_and_draw(void) {
         oam_meta_spr(enemies[i].x, enemies[i].y, warlock);
       } else {
         oam_meta_spr(enemies[i].x, enemies[i].y, warlock_1);
+      }
+    } else if (enemies[i].type == 3) {
+      // Fire spirit - alternates between two flame frames
+      if (enemies[i].anim < ANIM_SWITCH) {
+        oam_meta_spr(enemies[i].x, enemies[i].y, fire_spirit);
+      } else {
+        oam_meta_spr(enemies[i].x, enemies[i].y, fire_spirit_1);
       }
     } else if (enemies[i].anim < ANIM_SWITCH) {
       if (enemies[i].type == 0) oam_meta_spr(enemies[i].x, enemies[i].y, imp);

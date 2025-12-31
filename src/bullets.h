@@ -8,14 +8,14 @@
 #define DROP_STAR_CHANCE  2  // 1 in 16
 
 extern Fireball bullets[MAX_BULLETS];
-extern EnemyFireball ebullets[MAX_BULLETS];
+extern EnemyFireball ebullets[MAX_ENEMY_BULLETS];
 extern Fireball superbullet;
 
 void bullets_init(void);
 void ebullets_init(void);
 void fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char vy);
 void fire_super(unsigned char x, unsigned char y, signed char vx, signed char vy);
-void enemy_fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char vy);
+void enemy_fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char vy, unsigned char palette);
 void player_bullets_update_collide_draw(void);
 void super_update_collide_draw(void);
 void enemy_bullets_update_collide_draw(void);

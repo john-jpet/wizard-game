@@ -15,6 +15,7 @@
 
 // Game timing constants
 #define ENEMY_SPAWN_FAST 120   // frames until fast enemy spawns
+#define ENEMY_SPAWN_FIRE 180   // frames until fire spirit spawns (3 seconds)
 #define ENEMY_SPAWN_SLOW 240   // frames until slow enemy spawns
 #define ENEMY_SPAWN_WARLOCK 360 // frames until warlock spawns (6 seconds)
 
@@ -112,10 +113,13 @@ static void update_play(void) {
 
   enemycounter++;
   
-  // Spawn enemies at different intervals (check in order: smallest to largest)
+  // Spawn enemies at different intervals
   if (enemycounter == ENEMY_SPAWN_FAST) {
     spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 1);
   } 
+  if (enemycounter == ENEMY_SPAWN_FIRE) {
+    spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 3);
+  }
   if (enemycounter == ENEMY_SPAWN_SLOW) {
     spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 0);
   }

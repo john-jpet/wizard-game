@@ -125,6 +125,14 @@ const unsigned char fire_spirit[]={
 	128
 };
 
+const unsigned char fire_spirit_1[]={
+	  0, 0, 0x61, 1|OAM_FLIP_H,
+	  0, 8, 0x71, 1|OAM_FLIP_H,
+	  8, 0, 0x61, 1,
+	  8, 8, 0x71, 1,
+	128
+};
+
 const unsigned char slime_large[]={
 	  0, 0, 0x08, 2,
 	  0, 8, 0x18, 2,

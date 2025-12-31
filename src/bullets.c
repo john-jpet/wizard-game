@@ -8,7 +8,7 @@
 #include "gfx.h"
 
 Fireball bullets[MAX_BULLETS];
-EnemyFireball ebullets[MAX_BULLETS];
+EnemyFireball ebullets[MAX_ENEMY_BULLETS];
 Fireball superbullet;
 
 void bullets_init(void) {
@@ -21,7 +21,7 @@ void bullets_init(void) {
 
 void ebullets_init(void) {
     unsigned char i;
-    for (i = 0; i < MAX_BULLETS; i++) {
+    for (i = 0; i < MAX_ENEMY_BULLETS; i++) {
         ebullets[i].active = 0;
     }
     
@@ -56,9 +56,9 @@ void fire_super(unsigned char x, unsigned char y, signed char vx, signed char vy
 }
 
 
-void enemy_fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char vy) {
+void enemy_fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char vy, unsigned char palette) {
     unsigned char i;
-    for (i = 0; i < MAX_BULLETS; i++) {
+    for (i = 0; i < MAX_ENEMY_BULLETS; i++) {
         if (!ebullets[i].active) {
             ebullets[i].active = 1;
             ebullets[i].x = x;
@@ -67,6 +67,7 @@ void enemy_fire_bullet(unsigned char x, unsigned char y, signed char vx, signed 
             ebullets[i].height = 4;
             ebullets[i].vx = vx;
             ebullets[i].vy = vy;
+            ebullets[i].palette = palette;
             return;
         }
     }
@@ -184,12 +185,16 @@ void enemy_bullets_update_collide_draw(void) {
         if (!ebullets[bi].active) continue;
 
         ebullets[bi].y += ebullets[bi].vy;
+        ebullets[bi].x += ebullets[bi].vx;
 
         if (ebullets[bi].y > 0xF0) {
             ebullets[bi].active = 0;
             continue;
         }
-
+        if(ebullets[bi].x < 0x08 || ebullets[bi].x > 0xF8) {
+            ebullets[bi].active = 0;
+            continue;
+        }
         // collide with player
         if (!player_is_invincible() && check_collision(&ebullets[bi], &wizard)) {
             ebullets[bi].active = 0;
@@ -197,6 +202,6 @@ void enemy_bullets_update_collide_draw(void) {
             continue;
         }
 
-        oam_spr(ebullets[bi].x, ebullets[bi].y, BULLET_TILE, ENEMY_PAL);
+        oam_spr(ebullets[bi].x, ebullets[bi].y, BULLET_TILE, ebullets[bi].palette);
     }
 }

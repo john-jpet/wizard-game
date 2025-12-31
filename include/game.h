@@ -7,11 +7,13 @@
 
 // constants
 #define MAX_BULLETS 4
+#define MAX_ENEMY_BULLETS 8
 #define MAX_ENEMIES 6
 
 #define BULLET_TILE 0x15
 #define BULLET_PAL  1
 #define ENEMY_PAL   2
+#define WARLOCK_PAL 3
 
 #define ENEMY_SPAWN_MIN_X  8
 #define ENEMY_SPAWN_MAX_X  232
@@ -53,7 +55,7 @@ typedef struct {
   unsigned char x, y, width, height;
   signed char vx, vy;
   unsigned char active;
-  unsigned char _padding;  // Pad to 8 bytes for fast array access
+  unsigned char palette;  // Palette for drawing (was _padding)
 } EnemyFireball;
 
 extern unsigned int score;
