@@ -10,6 +10,7 @@ A simple NES homebrew arcade survival game: move a wizard left/right, shoot upwa
 ## Controls
 - D-Pad Left/Right: move
 - B: fire
+- A: super
 - Start/Any button: start game (also used to seed RNG)
 
 ## Build Requirements
