@@ -41,8 +41,14 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
       enemies[i].active = 1;
       enemies[i].x = x;
       enemies[i].y = y;
-      enemies[i].width = 16;
-      enemies[i].height = 16;
+      // Small slimes are 8x8, others are 16x16
+      if (type == 5) {
+        enemies[i].width = 8;
+        enemies[i].height = 8;
+      } else {
+        enemies[i].width = 16;
+        enemies[i].height = 16;
+      }
       if(type == 3) enemies[i].vx = 1;  // fire spirit weaves
       else enemies[i].vx = 0;
       enemies[i].vy = 0;
@@ -50,9 +56,12 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
       // Type 1 (fast imp): 1 HP
       // Type 2 (warlock): 5 HP
       // Type 3 (fire spirit): 2 HP
+      // Type 4 (large slime): 3 HP, splits into 2 small slimes
+      // Type 5 (small slime): 1 HP
       if (type == 0) enemies[i].hp = 3;
       else if (type == 2) enemies[i].hp = 5;
       else if (type == 3) enemies[i].hp = 2;
+      else if (type == 4) enemies[i].hp = 3;
       else enemies[i].hp = 1;
       enemies[i].anim = rand8() % ANIM_CYCLE;
       enemies[i].type = type;
@@ -93,6 +102,8 @@ void enemies_update_and_draw(void) {
     // Type 1 (fast): move 1 pixel every frame = 1 px/frame
     // Type 2 (warlock): move 1 pixel every 4 frames = 0.25 px/frame, STOP when firing
     // Type 3 (fire spirit): move 1 pixel every 2 frames = 0.5 px/frame (while weaving at 1 px/frame)
+    // Type 4 (large slime): move 1 pixel every 2 frames = 0.5 px/frame
+    // Type 5 (small slime): move 1 pixel every frame = 1 px/frame
     if (enemies[i].type == 0) {
       if (enemies[i].move_counter >= 2) {
         enemies[i].y++;
@@ -110,7 +121,13 @@ void enemies_update_and_draw(void) {
         enemies[i].y++;
         enemies[i].move_counter = 0;
       }
-    } else {  // type 1
+    } else if (enemies[i].type == 4) {
+      // Large slime: slow movement
+      if (enemies[i].move_counter >= 2) {
+        enemies[i].y++;
+        enemies[i].move_counter = 0;
+      }
+    } else {  // type 1 and type 5 (small slime)
       enemies[i].y++;
       enemies[i].move_counter = 0;
     }
@@ -157,12 +174,21 @@ void enemies_update_and_draw(void) {
       } else {
         oam_meta_spr(enemies[i].x, enemies[i].y, fire_spirit_1);
       }
-    } else if (enemies[i].anim < ANIM_SWITCH) {
-      if (enemies[i].type == 0) oam_meta_spr(enemies[i].x, enemies[i].y, imp);
-      else                      oam_meta_spr(enemies[i].x, enemies[i].y, diveimp);
+    } else if (enemies[i].type == 4) {
+      // Large slime - always uses same sprite
+      oam_meta_spr(enemies[i].x, enemies[i].y, slime_large);
+    } else if (enemies[i].type == 5) {
+      // Small slime - single 8x8 sprite
+      oam_spr(enemies[i].x, enemies[i].y, 0x0A, ENEMY_PAL);
     } else {
-      if (enemies[i].type == 0) oam_meta_spr(enemies[i].x, enemies[i].y, imp1);
-      else                      oam_meta_spr(enemies[i].x, enemies[i].y, diveimp1);
+      // Types 0 and 1 (imps) - animate normally
+      if (enemies[i].anim < ANIM_SWITCH) {
+        if (enemies[i].type == 0) oam_meta_spr(enemies[i].x, enemies[i].y, imp);
+        else                      oam_meta_spr(enemies[i].x, enemies[i].y, diveimp);
+      } else {
+        if (enemies[i].type == 0) oam_meta_spr(enemies[i].x, enemies[i].y, imp1);
+        else                      oam_meta_spr(enemies[i].x, enemies[i].y, diveimp1);
+      }
     }
   }
 }

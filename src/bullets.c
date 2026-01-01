@@ -125,10 +125,21 @@ void player_bullets_update_collide_draw(void) {
 
                 if (enemies[(unsigned char)ei].hp) enemies[(unsigned char)ei].hp--;
                 if (enemies[(unsigned char)ei].hp == 0) {
+                    unsigned char enemy_type = enemies[(unsigned char)ei].type;
+                    unsigned char enemy_x = enemies[(unsigned char)ei].x;
+                    unsigned char enemy_y = enemies[(unsigned char)ei].y;
+                    
                     enemies[(unsigned char)ei].active = 0;
+                    
+                    // Large slime splits into 2 small slimes
+                    if (enemy_type == 4) {
+                      spawn_enemy(enemy_x - 8, enemy_y, 5);  // Small slime left
+                      spawn_enemy(enemy_x + 8, enemy_y, 5);  // Small slime right
+                    }
+                    
                     d = roll_drop_pickup();
-                    if (d == 1) spawn_pickup(enemies[(unsigned char)ei].x + 4, enemies[(unsigned char)ei].y, 0);
-                    else if (d == 2) spawn_pickup(enemies[(unsigned char)ei].x + 4, enemies[(unsigned char)ei].y, 1);
+                    if (d == 1) spawn_pickup(enemy_x + 4, enemy_y, 0);
+                    else if (d == 2) spawn_pickup(enemy_x + 4, enemy_y, 1);
                     score_add(ENEMY_KILL_SCORE);
                 }
 
@@ -167,7 +178,18 @@ void super_update_collide_draw(void) {
 
     if (check_collision(&superbullet, &enemies[(unsigned char)ei])) {
       // kill enemy, but KEEP super active (pierce)
+      unsigned char enemy_type = enemies[(unsigned char)ei].type;
+      unsigned char enemy_x = enemies[(unsigned char)ei].x;
+      unsigned char enemy_y = enemies[(unsigned char)ei].y;
+      
       enemies[(unsigned char)ei].active = 0;
+      
+      // Large slime splits into 2 small slimes
+      if (enemy_type == 4) {
+        spawn_enemy(enemy_x - 8, enemy_y, 5);  // Small slime left
+        spawn_enemy(enemy_x + 8, enemy_y, 5);  // Small slime right
+      }
+      
       score_add(ENEMY_KILL_SCORE);
       break;
     }
