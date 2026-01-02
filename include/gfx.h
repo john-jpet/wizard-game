@@ -30,6 +30,7 @@ extern const unsigned char fire_spirit[];
 extern const unsigned char fire_spirit_1[];
 
 extern const unsigned char slime_large[];
+extern const unsigned char slime_large_1[];
 #define SMALL_SLIME_TILE 0x0A
 
 extern const unsigned char large_bullet[];

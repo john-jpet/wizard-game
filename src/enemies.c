@@ -175,8 +175,12 @@ void enemies_update_and_draw(void) {
         oam_meta_spr(enemies[i].x, enemies[i].y, fire_spirit_1);
       }
     } else if (enemies[i].type == 4) {
-      // Large slime - always uses same sprite
-      oam_meta_spr(enemies[i].x, enemies[i].y, slime_large);
+      // Large slime - alternates between two frames
+      if (enemies[i].anim < ANIM_SWITCH) {
+        oam_meta_spr(enemies[i].x, enemies[i].y, slime_large);
+      } else {
+        oam_meta_spr(enemies[i].x, enemies[i].y, slime_large_1);
+      }
     } else if (enemies[i].type == 5) {
       // Small slime - single 8x8 sprite
       oam_spr(enemies[i].x, enemies[i].y, 0x0A, ENEMY_PAL);

@@ -141,6 +141,14 @@ const unsigned char slime_large[]={
 	128
 };
 
+const unsigned char slime_large_1[]={
+	  0, 0, 0x28, 2,
+	  0, 8, 0x38, 2,
+	  8, 0, 0x29, 2,
+	  8, 8, 0x39, 2,
+	128
+};
+
 // Palette data
 const unsigned char palette_bg[]={
 0x0f, 0x27, 0x16, 0x30, // black, gray, lt gray, white
