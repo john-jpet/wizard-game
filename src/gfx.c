@@ -149,6 +149,18 @@ const unsigned char slime_large_1[]={
 	128
 };
 
+const unsigned char tank_imp[]={
+	  0,  0,0x45,1,
+	  0,  8,0x55,1,
+	  8,  0,0x45,1|OAM_FLIP_H,
+	  8,  8,0x55,1|OAM_FLIP_H,
+	  0, 16,0x65,1,
+	  0, 24,0x75,1,
+	  8, 16,0x65,1|OAM_FLIP_H,
+	  8, 24,0x75,1|OAM_FLIP_H,
+	128
+};
+
 // Palette data
 const unsigned char palette_bg[]={
 0x0f, 0x27, 0x16, 0x30, // black, gray, lt gray, white

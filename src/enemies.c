@@ -41,10 +41,13 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
       enemies[i].active = 1;
       enemies[i].x = x;
       enemies[i].y = y;
-      // Small slimes are 8x8, others are 16x16
+      // Tank imp is 16x32, small slimes are 8x8, others are 16x16
       if (type == 5) {
         enemies[i].width = 8;
         enemies[i].height = 8;
+      } else if (type == 6) {
+        enemies[i].width = 16;
+        enemies[i].height = 32;  // Tank imp is taller
       } else {
         enemies[i].width = 16;
         enemies[i].height = 16;
@@ -58,10 +61,12 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
       // Type 3 (fire spirit): 2 HP
       // Type 4 (large slime): 3 HP, splits into 2 small slimes
       // Type 5 (small slime): 1 HP
+      // Type 6 (tank imp): 7 HP, slow, fires large bullets
       if (type == 0) enemies[i].hp = 3;
       else if (type == 2) enemies[i].hp = 5;
       else if (type == 3) enemies[i].hp = 2;
       else if (type == 4) enemies[i].hp = 3;
+      else if (type == 6) enemies[i].hp = 7;
       else enemies[i].hp = 1;
       enemies[i].anim = rand8() % ANIM_CYCLE;
       enemies[i].type = type;
@@ -104,6 +109,7 @@ void enemies_update_and_draw(void) {
     // Type 3 (fire spirit): move 1 pixel every 2 frames = 0.5 px/frame (while weaving at 1 px/frame)
     // Type 4 (large slime): move 1 pixel every 2 frames = 0.5 px/frame
     // Type 5 (small slime): move 1 pixel every frame = 1 px/frame
+    // Type 6 (tank imp): move 1 pixel every 3 frames = 0.33 px/frame (very slow)
     if (enemies[i].type == 0) {
       if (enemies[i].move_counter >= 2) {
         enemies[i].y++;
@@ -124,6 +130,12 @@ void enemies_update_and_draw(void) {
     } else if (enemies[i].type == 4) {
       // Large slime: slow movement
       if (enemies[i].move_counter >= 2) {
+        enemies[i].y++;
+        enemies[i].move_counter = 0;
+      }
+    } else if (enemies[i].type == 6) {
+      // Tank imp: very slow, heavy movement
+      if (enemies[i].move_counter >= 3) {
         enemies[i].y++;
         enemies[i].move_counter = 0;
       }
@@ -155,6 +167,9 @@ void enemies_update_and_draw(void) {
       enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, -1, 2, WARLOCK_PAL);
       enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, 0, 2, WARLOCK_PAL);
       enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, 1, 2, WARLOCK_PAL);
+    } else if (enemies[i].type == 6 && enemies[i].anim == ANIM_SWITCH) {
+      // Tank imp fires a large bullet (using palette 1 to match tank)
+      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 16, 0, 2, 1);
     }
     
     // DRAW: Combined in same loop to save iteration overhead
@@ -184,6 +199,9 @@ void enemies_update_and_draw(void) {
     } else if (enemies[i].type == 5) {
       // Small slime - single 8x8 sprite
       oam_spr(enemies[i].x, enemies[i].y, 0x0A, ENEMY_PAL);
+    } else if (enemies[i].type == 6) {
+      // Tank imp - always uses same sprite (16x32)
+      oam_meta_spr(enemies[i].x, enemies[i].y, tank_imp);
     } else {
       // Types 0 and 1 (imps) - animate normally
       if (enemies[i].anim < ANIM_SWITCH) {

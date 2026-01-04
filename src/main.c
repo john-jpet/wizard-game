@@ -18,6 +18,7 @@
 #define ENEMY_SPAWN_FIRE 180   // frames until fire spirit spawns (3 seconds)
 #define ENEMY_SPAWN_SLOW 240   // frames until slow enemy spawns
 #define ENEMY_SPAWN_SLIME 300  // frames until large slime spawns (5 seconds)
+#define ENEMY_SPAWN_TANK 330   // frames until tank imp spawns (5.5 seconds)
 #define ENEMY_SPAWN_WARLOCK 360 // frames until warlock spawns (6 seconds)
 
 typedef enum {
@@ -126,6 +127,9 @@ static void update_play(void) {
   }
   if (enemycounter == ENEMY_SPAWN_SLIME) {
     spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 4);
+  }
+  if (enemycounter == ENEMY_SPAWN_TANK) {
+    spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 6);
   }
   if (enemycounter >= ENEMY_SPAWN_WARLOCK) {
     spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 2);
