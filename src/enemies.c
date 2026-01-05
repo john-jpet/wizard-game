@@ -167,10 +167,7 @@ void enemies_update_and_draw(void) {
       enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, -1, 2, WARLOCK_PAL);
       enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, 0, 2, WARLOCK_PAL);
       enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, 1, 2, WARLOCK_PAL);
-    } else if (enemies[i].type == 6 && enemies[i].anim == ANIM_SWITCH) {
-      // Tank imp fires a large bullet (using palette 1 to match tank)
-      enemy_fire_bullet(enemies[i].x + 4, enemies[i].y + 16, 0, 2, 1);
-    }
+    } 
     
     // DRAW: Combined in same loop to save iteration overhead
     if (enemies[i].type == 2) {
