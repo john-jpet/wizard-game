@@ -198,7 +198,7 @@ void enemies_update_and_draw(void) {
       oam_spr(enemies[i].x, enemies[i].y, 0x0A, ENEMY_PAL);
     } else if (enemies[i].type == 6) {
       // Tank imp - always uses same sprite (16x32)
-      oam_meta_spr(enemies[i].x, enemies[i].y, tank_imp);
+      oam_meta_spr(enemies[i].x, enemies[i].y, golem);
     } else {
       // Types 0 and 1 (imps) - animate normally
       if (enemies[i].anim < ANIM_SWITCH) {

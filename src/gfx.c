@@ -149,15 +149,15 @@ const unsigned char slime_large_1[]={
 	128
 };
 
-const unsigned char tank_imp[]={
-	  0,  0,0x45,1,
-	  0,  8,0x55,1,
-	  8,  0,0x45,1|OAM_FLIP_H,
-	  8,  8,0x55,1|OAM_FLIP_H,
-	  0, 16,0x65,1,
-	  0, 24,0x75,1,
-	  8, 16,0x65,1|OAM_FLIP_H,
-	  8, 24,0x75,1|OAM_FLIP_H,
+const unsigned char golem[]={
+	  0,  0,0x45,2,
+	  0,  8,0x55,2,
+	  8,  0,0x45,2|OAM_FLIP_H,
+	  8,  8,0x55,2|OAM_FLIP_H,
+	  0, 16,0x65,2,
+	  0, 24,0x75,2,
+	  8, 16,0x65,2|OAM_FLIP_H,
+	  8, 24,0x75,2|OAM_FLIP_H,
 	128
 };
 
