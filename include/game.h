@@ -8,7 +8,7 @@
 // constants
 #define MAX_BULLETS 4
 #define MAX_ENEMY_BULLETS 8
-#define MAX_ENEMIES 6
+#define MAX_ENEMIES 4
 
 #define BULLET_TILE 0x15
 #define BULLET_PAL  1

@@ -41,13 +41,13 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
       enemies[i].active = 1;
       enemies[i].x = x;
       enemies[i].y = y;
-      // Golem is 24x32 (3 tiles wide, 4 tiles tall), small slimes are 8x8, others are 16x16
+      // Golem is 24x24 (3 tiles wide, 3 tiles tall), small slimes are 8x8, others are 16x16
       if (type == 5) {
         enemies[i].width = 8;
         enemies[i].height = 8;
       } else if (type == 6) {
         enemies[i].width = 24;  // Golem is 3 tiles wide
-        enemies[i].height = 32;  // Golem is 4 tiles tall
+        enemies[i].height = 24;  // Golem is 4 tiles tall
       } else {
         enemies[i].width = 16;
         enemies[i].height = 16;
@@ -55,16 +55,15 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
       if(type == 3) enemies[i].vx = 1;  // fire spirit weaves
       else enemies[i].vx = 0;
       enemies[i].vy = 0;
-      // Type 0 (slow imp): 3 HP
+      // Type 0 (slow imp): 2 HP
       // Type 1 (fast imp): 1 HP
-      // Type 2 (warlock): 5 HP
-      // Type 3 (fire spirit): 2 HP
+      // Type 2 (warlock): 2 HP
+      // Type 3 (fire spirit): 1 HP
       // Type 4 (large slime): 3 HP, splits into 2 small slimes
       // Type 5 (small slime): 1 HP
       // Type 6 (tank imp): 7 HP, slow, fires large bullets
-      if (type == 0) enemies[i].hp = 3;
-      else if (type == 2) enemies[i].hp = 5;
-      else if (type == 3) enemies[i].hp = 2;
+      if (type == 0) enemies[i].hp = 2;
+      else if (type == 2) enemies[i].hp = 2;
       else if (type == 4) enemies[i].hp = 3;
       else if (type == 6) enemies[i].hp = 7;
       else enemies[i].hp = 1;
@@ -103,43 +102,43 @@ void enemies_update_and_draw(void) {
     // Check if warlock is currently in firing animation (long duration)
     is_firing = (enemies[i].type == 2 && enemies[i].anim >= WARLOCK_FIRE_FRAME && enemies[i].anim < (WARLOCK_FIRE_FRAME + WARLOCK_FIRE_DURATION));
     
-    // Type 0 (slow): move 1 pixel every 2 frames = 0.5 px/frame
-    // Type 1 (fast): move 1 pixel every frame = 1 px/frame
-    // Type 2 (warlock): move 1 pixel every 4 frames = 0.25 px/frame, STOP when firing
-    // Type 3 (fire spirit): move 1 pixel every 2 frames = 0.5 px/frame (while weaving at 1 px/frame)
-    // Type 4 (large slime): move 1 pixel every 2 frames = 0.5 px/frame
-    // Type 5 (small slime): move 1 pixel every frame = 1 px/frame
-    // Type 6 (tank imp): move 1 pixel every 3 frames = 0.33 px/frame (very slow)
-    if (enemies[i].type == 0) {
+    // Type 0 (slow): move 1 pixel every 2 frames = 0.5 px/frame (moderate)
+    // Type 1 (fast): move 1 pixel every frame = 1 px/frame (fast)
+    // Type 2 (warlock): move 1 pixel every 5 frames = 0.2 px/frame (slow), STOP when firing
+    // Type 3 (fire spirit): move 1 pixel every 3 frames = 0.33 px/frame (low moderate, while weaving at 1 px/frame)
+    // Type 4 (large slime): move 1 pixel every 5 frames = 0.2 px/frame (slow)
+    // Type 5 (small slime): move 1 pixel every 2 frames = 0.5 px/frame (moderate)
+    // Type 6 (golem): move 1 pixel every 10 frames = 0.1 px/frame (very slow)
+    if (enemies[i].type == 0 || enemies[i].type == 5) {
       if (enemies[i].move_counter >= 2) {
         enemies[i].y++;
         enemies[i].move_counter = 0;
       }
     } else if (enemies[i].type == 2) {
       // Warlock: stops moving when firing
-      if (!is_firing && enemies[i].move_counter >= 4) {
+      if (!is_firing && enemies[i].move_counter >= 5) {
         enemies[i].y++;
         enemies[i].move_counter = 0;
       }
     } else if (enemies[i].type == 3) {
       // Fire spirit: moves down every 2 frames (same vertical speed as type 0, but weaves)
-      if (enemies[i].move_counter >= 2) {
+      if (enemies[i].move_counter >= 3) {
         enemies[i].y++;
         enemies[i].move_counter = 0;
       }
     } else if (enemies[i].type == 4) {
       // Large slime: slow movement
-      if (enemies[i].move_counter >= 2) {
+      if (enemies[i].move_counter >= 5) {
         enemies[i].y++;
         enemies[i].move_counter = 0;
       }
     } else if (enemies[i].type == 6) {
-      // Tank imp: very slow, heavy movement
-      if (enemies[i].move_counter >= 3) {
+      // Golem: very slow, heavy movement
+      if (enemies[i].move_counter >= 10) {
         enemies[i].y++;
         enemies[i].move_counter = 0;
       }
-    } else {  // type 1 and type 5 (small slime)
+    } else {  // type 1 (only diving imp)
       enemies[i].y++;
       enemies[i].move_counter = 0;
     }
