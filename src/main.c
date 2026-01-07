@@ -116,6 +116,8 @@ static void update_play(void) {
   enemycounter++;
   
   // Spawn enemies at different intervals
+  // TESTING: Only warlock (fires 3-bullet spread)
+  
   if (enemycounter == ENEMY_SPAWN_FAST) {
     spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 1);
   } 
@@ -131,6 +133,7 @@ static void update_play(void) {
   if (enemycounter == ENEMY_SPAWN_TANK) {
     spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 6);
   }
+  
   if (enemycounter >= ENEMY_SPAWN_WARLOCK) {
     spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 2);
     enemycounter = 0;  // Reset AFTER warlock spawns

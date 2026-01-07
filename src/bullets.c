@@ -110,9 +110,12 @@ void player_bullets_update_collide_draw(void) {
         lane = bullet_lane_from_center(bullets[bi].x);
 
         // Check ONLY closest lanes (optimize bounds)
-        for (l2 = (lane > 0 ? lane - 1 : 0);
-             l2 <= lane + 1 && l2 < LANES;
-             l2++) {
+        // Pre-calculate loop bounds to avoid expensive ternary and double-comparison
+        {
+            unsigned char lane_start = (lane > 0) ? (lane - 1) : 0;
+            unsigned char lane_end = (lane < LANES - 1) ? (lane + 1) : (LANES - 1);
+            
+            for (l2 = lane_start; l2 <= lane_end; l2++) {
 
             ei = lane_enemy[l2];
             if (ei < 0) continue;
@@ -145,6 +148,7 @@ void player_bullets_update_collide_draw(void) {
 
                 break;
             }
+            }
         }
 
         // Draw AFTER collision (skip if bullet died)
@@ -169,7 +173,13 @@ void super_update_collide_draw(void) {
   }
 
   lane = (unsigned char)((superbullet.x + 8) >> LANE_SHIFT); // 16px wide -> +8 center 
-  for (l2 = (lane > 0 ? lane - 1 : 0); l2 <= lane + 1 && l2 < LANES; l2++) {
+  
+  // Pre-calculate loop bounds to avoid expensive ternary and double-comparison
+  {
+      unsigned char lane_start = (lane > 0) ? (lane - 1) : 0;
+      unsigned char lane_end = (lane < LANES - 1) ? (lane + 1) : (LANES - 1);
+      
+      for (l2 = lane_start; l2 <= lane_end; l2++) {
     ei = lane_enemy[l2];
     if (ei < 0) continue;
     
@@ -193,6 +203,7 @@ void super_update_collide_draw(void) {
       score_add(ENEMY_KILL_SCORE);
       break;
     }
+      }
   }
 
   // draw 16x16 metasprite ONCE per frame
@@ -203,7 +214,7 @@ void super_update_collide_draw(void) {
 void enemy_bullets_update_collide_draw(void) {
     unsigned char bi;
 
-    for (bi = 0; bi < MAX_BULLETS; bi++) {
+    for (bi = 0; bi < MAX_ENEMY_BULLETS; bi++) {
         if (!ebullets[bi].active) continue;
 
         ebullets[bi].y += ebullets[bi].vy;
@@ -217,7 +228,8 @@ void enemy_bullets_update_collide_draw(void) {
             ebullets[bi].active = 0;
             continue;
         }
-        // collide with player
+        
+        // Collision check with player (simplified - no distance pre-check)
         if (!player_is_invincible() && check_collision(&ebullets[bi], &wizard)) {
             ebullets[bi].active = 0;
             player_take_damage();

@@ -41,13 +41,13 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
       enemies[i].active = 1;
       enemies[i].x = x;
       enemies[i].y = y;
-      // Tank imp is 16x32, small slimes are 8x8, others are 16x16
+      // Golem is 24x32 (3 tiles wide, 4 tiles tall), small slimes are 8x8, others are 16x16
       if (type == 5) {
         enemies[i].width = 8;
         enemies[i].height = 8;
       } else if (type == 6) {
-        enemies[i].width = 16;
-        enemies[i].height = 32;  // Tank imp is taller
+        enemies[i].width = 24;  // Golem is 3 tiles wide
+        enemies[i].height = 32;  // Golem is 4 tiles tall
       } else {
         enemies[i].width = 16;
         enemies[i].height = 16;
@@ -197,8 +197,12 @@ void enemies_update_and_draw(void) {
       // Small slime - single 8x8 sprite
       oam_spr(enemies[i].x, enemies[i].y, 0x0A, ENEMY_PAL);
     } else if (enemies[i].type == 6) {
-      // Tank imp - always uses same sprite (16x32)
-      oam_meta_spr(enemies[i].x, enemies[i].y, golem);
+      // Golem - alternates between two frames
+      if (enemies[i].anim < ANIM_SWITCH) {
+        oam_meta_spr(enemies[i].x, enemies[i].y, golem);
+      } else {
+        oam_meta_spr(enemies[i].x, enemies[i].y, golem_1);
+      }
     } else {
       // Types 0 and 1 (imps) - animate normally
       if (enemies[i].anim < ANIM_SWITCH) {

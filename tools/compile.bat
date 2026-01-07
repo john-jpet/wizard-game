@@ -40,6 +40,6 @@ ld65 -C cfg\nrom_32k_vert.cfg ^
   -o build\%name%.nes ^
   build\crt0.o build\main.o build\player.o build\enemies.o build\bullets.o build\gfx.o build\hud.o build\game.o build\pickup.o ^
   "%CC65_HOME%\lib\nes.lib" ^
-  -Ln build\labels.txt --dbgfile build\dbg.txt
+  -Ln build\labels.txt --dbgfile build\dbg.txt -m build\%name%.map
 
 pause

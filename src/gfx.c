@@ -150,16 +150,33 @@ const unsigned char slime_large_1[]={
 };
 
 const unsigned char golem[]={
-	  0,  0,0x45,2,
-	  0,  8,0x55,2,
-	  8,  0,0x45,2|OAM_FLIP_H,
-	  8,  8,0x55,2|OAM_FLIP_H,
-	  0, 16,0x65,2,
-	  0, 24,0x75,2,
-	  8, 16,0x65,2|OAM_FLIP_H,
-	  8, 24,0x75,2|OAM_FLIP_H,
+	  0,  0,0x4A,2,
+	  8,  0,0x4B,2,
+	  16, 0,0x4A,2|OAM_FLIP_H,
+	  0,  8,0x5A,2,
+	  8,  8,0x5B,2,
+	  16, 8,0x5C,2,
+	  0,  16,0x6A,2,
+	  8,  16,0x6B,2,
+	  16, 16,0x6C,2,
+	  
 	128
 };
+
+const unsigned char golem_1[]={
+	  0,  0,0x4A,2,
+	  8,  0,0x4B,2,
+	  16, 0,0x4A,2|OAM_FLIP_H,
+	  0,  8,0x5C,2|OAM_FLIP_H,
+	  8,  8,0x5B,2,
+	  16, 8,0x5A,2|OAM_FLIP_H,
+	  0,  16,0x6C,2|OAM_FLIP_H,
+	  8,  16,0x6B,2|OAM_FLIP_H,
+	  16, 16,0x6A,2|OAM_FLIP_H,
+	  
+	128
+};
+
 
 // Palette data
 const unsigned char palette_bg[]={
