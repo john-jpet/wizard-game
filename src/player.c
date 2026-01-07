@@ -69,7 +69,7 @@ void player_update(void) {
         fire_bullet(wizard.x + 4, wizard.y + 8, 0, -4);
     }
     if(pad_new & PAD_A) {
-        if(mp >= 3) { // 3 for testing; change as needed
+        if((pad & PAD_UP) && mp >= 3) { // 3 for testing; change as needed
             nuke_trigger();
         }
         else if(mp >= 1) {

@@ -7,6 +7,9 @@
 #define MAX_PICKUPS 5
 #define PICKUPS_PAL 1
 
+#define DROP_HEART_CHANCE 8   // 1 in 8
+#define DROP_STAR_CHANCE 16  // 1 in 16
+
 typedef struct {
   unsigned char x;
   unsigned char y;

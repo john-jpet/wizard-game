@@ -5,7 +5,7 @@
 #include "game.h"
 
 #define DROP_HEART_CHANCE 8   // 1 in 8
-#define DROP_STAR_CHANCE  2  // 1 in 16
+#define DROP_STAR_CHANCE  16  // 1 in 16
 
 extern Fireball bullets[MAX_BULLETS];
 extern EnemyFireball ebullets[MAX_ENEMY_BULLETS];
