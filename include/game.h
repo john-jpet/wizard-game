@@ -7,7 +7,7 @@
 
 // constants
 #define MAX_BULLETS 4
-#define MAX_ENEMY_BULLETS 8
+#define MAX_ENEMY_BULLETS 6  // Reduced from 8 to prevent lag with multiple warlocks
 #define MAX_ENEMIES 4
 
 #define BULLET_TILE 0x15

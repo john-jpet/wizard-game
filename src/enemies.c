@@ -216,15 +216,20 @@ void enemies_update_and_draw(void) {
 }
 
 void build_lane_enemy_table(void) {
-  unsigned char l, i;
+  unsigned char i;
+  unsigned char lane;
 
-  for (l = 0; l < LANES; l++) lane_enemy[l] = -1;
+  // Clear lanes - unrolled for speed (16 assignments is faster than 16 loop iterations on 6502)
+  lane_enemy[0] = -1; lane_enemy[1] = -1; lane_enemy[2] = -1; lane_enemy[3] = -1;
+  lane_enemy[4] = -1; lane_enemy[5] = -1; lane_enemy[6] = -1; lane_enemy[7] = -1;
+  lane_enemy[8] = -1; lane_enemy[9] = -1; lane_enemy[10] = -1; lane_enemy[11] = -1;
+  lane_enemy[12] = -1; lane_enemy[13] = -1; lane_enemy[14] = -1; lane_enemy[15] = -1;
 
   for (i = 0; i < MAX_ENEMIES; i++) {
-    unsigned char lane;
     if (!enemies[i].active) continue;
 
-    lane = enemy_lane_from_center(enemies[i].x);
+    // Inline lane calculation (avoid function call overhead)
+    lane = (unsigned char)((enemies[i].x + 8) >> LANE_SHIFT);
 
     if (lane_enemy[lane] < 0 || enemies[i].y > enemies[(unsigned char)lane_enemy[lane]].y) {
       lane_enemy[lane] = (signed char)i;

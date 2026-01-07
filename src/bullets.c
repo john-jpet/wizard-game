@@ -88,11 +88,18 @@ unsigned char roll_drop_pickup(void) {
 }
 
 unsigned char d;
+unsigned char pending_kills; // Track number of kills this frame for score
+unsigned char pending_pickups[4][3]; // Store up to 4 pending pickups [x, y, type]
+unsigned char pending_pickup_count;
+
 void player_bullets_update_collide_draw(void) {
     unsigned char bi;
     signed char ei;
     unsigned char lane;
     unsigned char l2;
+
+    pending_kills = 0; // Reset kill counter
+    pending_pickup_count = 0; // Reset pickup queue
 
     for (bi = 0; bi < MAX_BULLETS; bi++) {
 
@@ -133,17 +140,24 @@ void player_bullets_update_collide_draw(void) {
                     unsigned char enemy_y = enemies[(unsigned char)ei].y;
                     
                     enemies[(unsigned char)ei].active = 0;
+                    pending_kills++; // Increment kill counter
                     
-                    // Large slime splits into 2 small slimes
+                    // Large slime splits into 2 small slimes (keep this - it's gameplay critical)
                     if (enemy_type == 4) {
-                      spawn_enemy(enemy_x - 8, enemy_y, 5);  // Small slime left
-                      spawn_enemy(enemy_x + 8, enemy_y, 5);  // Small slime right
+                      spawn_enemy(enemy_x - 8, enemy_y, 5);
+                      spawn_enemy(enemy_x + 8, enemy_y, 5);
                     }
                     
-                    d = roll_drop_pickup();
-                    if (d == 1) spawn_pickup(enemy_x + 4, enemy_y, 0);
-                    else if (d == 2) spawn_pickup(enemy_x + 4, enemy_y, 1);
-                    score_add(ENEMY_KILL_SCORE);
+                    // Queue pickup for later spawning (avoid expensive work in loop)
+                    if (pending_pickup_count < 4) {
+                        d = roll_drop_pickup();
+                        if (d) {
+                            pending_pickups[pending_pickup_count][0] = enemy_x + 4;
+                            pending_pickups[pending_pickup_count][1] = enemy_y;
+                            pending_pickups[pending_pickup_count][2] = d - 1; // Store type as 0 or 1
+                            pending_pickup_count++;
+                        }
+                    }
                 }
 
                 break;
@@ -155,6 +169,16 @@ void player_bullets_update_collide_draw(void) {
         if (bullets[bi].active) {
             oam_spr(bullets[bi].x, bullets[bi].y, BULLET_TILE, BULLET_PAL);
         }
+    }
+    
+    // Process all deferred work AFTER collision loop
+    if (pending_kills) {
+        score_add(ENEMY_KILL_SCORE * pending_kills);
+    }
+    
+    // Spawn all pending pickups
+    for (bi = 0; bi < pending_pickup_count; bi++) {
+        spawn_pickup(pending_pickups[bi][0], pending_pickups[bi][1], pending_pickups[bi][2]);
     }
 }
 
@@ -229,10 +253,11 @@ void enemy_bullets_update_collide_draw(void) {
             continue;
         }
         
-        // Collision check with player (simplified - no distance pre-check)
-        if (!player_is_invincible() && check_collision(&ebullets[bi], &wizard)) {
+        // Collision check with player
+        // Note: Inline invincibility check to avoid function call overhead
+        if (check_collision((Sprite*)&ebullets[bi], (Sprite*)&wizard)) {
             ebullets[bi].active = 0;
-            player_take_damage();
+            player_take_damage();  // This function handles invincibility internally
             continue;
         }
 
