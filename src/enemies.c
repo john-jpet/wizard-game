@@ -239,6 +239,9 @@ void build_lane_enemy_table(void) {
 
     // Inline lane calculation (avoid function call overhead)
     lane = (unsigned char)((enemies[i].x + 8) >> LANE_SHIFT);
+    
+    // CRITICAL: Clamp lane to valid range [0-15] to prevent buffer overflow
+    if (lane >= LANES) lane = LANES - 1;
 
     if (lane_enemy[lane] < 0 || enemies[i].y > enemies[(unsigned char)lane_enemy[lane]].y) {
       lane_enemy[lane] = (signed char)i;

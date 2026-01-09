@@ -8,7 +8,7 @@
 // constants
 #define MAX_BULLETS 4
 #define MAX_ENEMY_BULLETS 6  // Reduced from 8 to prevent lag with multiple warlocks
-#define MAX_ENEMIES 4
+#define MAX_ENEMIES 6
 
 #define BULLET_TILE 0x15
 #define BULLET_PAL  1
@@ -65,7 +65,7 @@ typedef struct {
   unsigned char enemy_weights[7]; // Weights for enemy types 0-6
 } Wave;
 
-extern Wave waves[5];  // Forward declaration
+extern Wave waves[10];  // Forward declaration
 
 extern unsigned int score;
 
