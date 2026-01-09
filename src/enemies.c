@@ -29,6 +29,15 @@ void enemies_init(void) {
   for (i = 0; i < MAX_ENEMIES; i++) enemies[i].active = 0;
 }
 
+unsigned char count_active_enemies(void) {
+  unsigned char count = 0;
+  unsigned char i;
+  for (i = 0; i < MAX_ENEMIES; i++) {
+    if (enemies[i].active) count++;
+  }
+  return count;
+}
+
 void clear_enemy_bullets(void) {
   unsigned char i;
   for (i = 0; i < MAX_BULLETS; i++) ebullets[i].active = 0;

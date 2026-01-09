@@ -69,4 +69,19 @@ void hud_init(void) {
   one_vram_buffer('P', NTADR_A(2, 2));
   one_vram_buffer(':', NTADR_A(3, 2));
   multi_vram_buffer_horz("SCORE:00000", 11, NTADR_A(12, 1));
+  one_vram_buffer('W', NTADR_A(12, 2));
+  one_vram_buffer('A', NTADR_A(13, 2));
+  one_vram_buffer('V', NTADR_A(14, 2));
+  one_vram_buffer('E', NTADR_A(15, 2));
+  one_vram_buffer(':', NTADR_A(16, 2));
+}
+
+void hud_set_wave(unsigned char wave) {
+  // Update wave number display
+  one_vram_buffer('W', NTADR_A(12, 2));
+  one_vram_buffer('A', NTADR_A(13, 2));
+  one_vram_buffer('V', NTADR_A(14, 2));
+  one_vram_buffer('E', NTADR_A(15, 2));
+  one_vram_buffer(':', NTADR_A(16, 2));
+  one_vram_buffer((unsigned char)('0' + wave), NTADR_A(17, 2));
 }

@@ -13,13 +13,13 @@
 #include "hud.h"
 #include "pickup.h"
 
-// Game timing constants
-#define ENEMY_SPAWN_FAST 120   // frames until fast enemy spawns
-#define ENEMY_SPAWN_FIRE 180   // frames until fire spirit spawns (3 seconds)
-#define ENEMY_SPAWN_SLOW 240   // frames until slow enemy spawns
-#define ENEMY_SPAWN_SLIME 300  // frames until large slime spawns (5 seconds)
-#define ENEMY_SPAWN_TANK 330   // frames until tank imp spawns (5.5 seconds)
-#define ENEMY_SPAWN_WARLOCK 360 // frames until warlock spawns (6 seconds)
+// // Game timing constants
+// #define ENEMY_SPAWN_FAST 120   // frames until fast enemy spawns
+// #define ENEMY_SPAWN_FIRE 180   // frames until fire spirit spawns (3 seconds)
+// #define ENEMY_SPAWN_SLOW 240   // frames until slow enemy spawns
+// #define ENEMY_SPAWN_SLIME 300  // frames until large slime spawns (5 seconds)
+// #define ENEMY_SPAWN_TANK 330   // frames until tank imp spawns (5.5 seconds)
+// #define ENEMY_SPAWN_WARLOCK 360 // frames until warlock spawns (6 seconds)
 
 typedef enum {
   STATE_TITLE = 0,
@@ -30,13 +30,24 @@ typedef enum {
 static GameState state;
 static unsigned char state_just_entered;
 
-static unsigned int enemycounter;  // Changed to unsigned int to reach 360
+//static unsigned int enemycounter;  // Changed to unsigned int to reach 360
 static unsigned char last_hp;
 static unsigned int last_score;
 static unsigned int last_mp;
 
 static unsigned char hp;
 static unsigned char mp;
+
+static unsigned char framecounter;
+static unsigned char wave;
+
+Wave waves[] = {
+  {3, 120, 1800, {30, 70, 0, 0, 0, 0, 0}},   // Wave 1
+  {4, 100, 2400, {30, 30, 20, 10, 5, 5, 0}},  // Wave 2
+  {4, 80, 3000, {20, 25, 25, 15, 10, 5, 0}},   // Wave 3
+  {4, 60, 3600, {10, 20, 30, 20, 10, 10, 0}}, // Wave 4
+  {4, 50, 4200, {5, 15, 25, 25, 15, 15, 0}},   // Wave 5
+};
 
 static unsigned char rand_range(unsigned char min, unsigned char max) {
   return (unsigned char)(min + (rand8() % (max - min + 1)));
@@ -85,12 +96,15 @@ static void enter_play(void) {
   
 
   // any counters
-  enemycounter = 0;
+  //enemycounter = 0;
+  framecounter = 0;
+  wave = 0;
 
   // IMPORTANT: enable vram buffer updates during gameplay
   set_vram_buffer();
   clear_vram_buffer();
   hud_init();
+  hud_set_wave(1); // display wave number (1-based)
   last_hp = 255;     // force HUD redraw
   last_mp = 255;     // force HUD redraw
   last_score = 0xFFFFFFFF;
@@ -113,31 +127,70 @@ static void update_title(void) {
 static void update_play(void) {
   player_update();
 
-  enemycounter++;
-  
+  //enemycounter++;
+
+  waves[wave].duration--;
+  framecounter++;
+  if (waves[wave].duration == 0) {
+    wave++;
+    hud_set_wave(wave + 1); // display wave number (1-based)
+    if (wave >= 5) wave = 4; // stay on last wave
+    framecounter = 0;
+  }
   // Spawn enemies at different intervals
+
+  if (framecounter >= waves[wave].spawn_interval) {
+    // Check if we're already at max enemies for this wave
+    if (count_active_enemies() < waves[wave].max_enemies) {
+      unsigned char total_weight = 0;
+      unsigned char r;
+      unsigned char i;
+      unsigned char enemy_type = 0;
+
+      // Calculate total weight
+      for (i = 0; i < 7; i++) {
+        total_weight += waves[wave].enemy_weights[i];
+      }
+
+      // Roll a random number between 0 and total_weight - 1
+      r = rand8() % total_weight;
+
+      // Determine enemy type based on weights
+      for (i = 0; i < 7; i++) {
+        if (r < waves[wave].enemy_weights[i]) {
+          enemy_type = i;
+          break;
+        }
+        r -= waves[wave].enemy_weights[i];
+      }
+
+      spawn_enemy(rand_range(16, 240), 0x10, enemy_type);
+    }
+    framecounter = 0;
+  }
+
   // TESTING: Only warlock (fires 3-bullet spread)
   
-  if (enemycounter == ENEMY_SPAWN_FAST) {
-    spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 1);
-  } 
-  if (enemycounter == ENEMY_SPAWN_FIRE) {
-    spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 3);
-  }
-  if (enemycounter == ENEMY_SPAWN_SLOW) {
-    spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 0);
-  }
-  if (enemycounter == ENEMY_SPAWN_SLIME) {
-    spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 4);
-  }
-  if (enemycounter == ENEMY_SPAWN_TANK) {
-    spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 6);
-  }
+  // if (enemycounter == ENEMY_SPAWN_FAST) {
+  //   spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 1);
+  // } 
+  // if (enemycounter == ENEMY_SPAWN_FIRE) {
+  //   spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 3);
+  // }
+  // if (enemycounter == ENEMY_SPAWN_SLOW) {
+  //   spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 0);
+  // }
+  // if (enemycounter == ENEMY_SPAWN_SLIME) {
+  //   spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 4);
+  // }
+  // if (enemycounter == ENEMY_SPAWN_TANK) {
+  //   spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 6);
+  // }
   
-  if (enemycounter >= ENEMY_SPAWN_WARLOCK) {
-    spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 2);
-    enemycounter = 0;  // Reset AFTER warlock spawns
-  }
+  // if (enemycounter >= ENEMY_SPAWN_WARLOCK) {
+  //   spawn_enemy(rand_range(ENEMY_SPAWN_MIN_X, ENEMY_SPAWN_MAX_X), 0x10, 2);
+  //   enemycounter = 0;  // Reset AFTER warlock spawns
+  // }
 
   enemies_update_and_draw();
   build_lane_enemy_table();

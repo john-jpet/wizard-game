@@ -58,6 +58,15 @@ typedef struct {
   unsigned char palette;  // Palette for drawing (was _padding)
 } EnemyFireball;
 
+typedef struct {
+  unsigned char max_enemies;
+  unsigned char spawn_interval;
+  unsigned int duration;
+  unsigned char enemy_weights[7]; // Weights for enemy types 0-6
+} Wave;
+
+extern Wave waves[5];  // Forward declaration
+
 extern unsigned int score;
 
 void score_add(unsigned int amount);
