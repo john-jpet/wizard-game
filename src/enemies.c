@@ -6,8 +6,8 @@
 #include "gfx.h"
 
 #define ENEMY_BOTTOM_Y 0xD8
-#define ANIM_CYCLE 60
-#define ANIM_SWITCH 30
+#define ANIM_CYCLE 100
+#define ANIM_SWITCH 50
 #define WARLOCK_ANIM_CYCLE 120  // Warlock has longer animation cycle
 #define WARLOCK_FIRE_FRAME 100   // Warlock fires at this frame
 #define WARLOCK_FIRE_DURATION 30 // Warlock stays in fire pose for 30 frames
