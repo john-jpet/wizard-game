@@ -41,7 +41,9 @@ typedef struct {
   unsigned char anim;
   unsigned char type;
   unsigned char move_counter;
-  unsigned char _padding[5];  // Pad to 16 bytes for fast array access
+  unsigned char move_threshold;  // For golem berserker: frames needed to move 1px
+  unsigned char golem_fired_flags;  // Bit flags: bit 0 = fired at 5HP, bit 1 = fired at 2HP
+  unsigned char _padding[3];  // Pad to 16 bytes for fast array access
 } Enemy;
 
 typedef struct {

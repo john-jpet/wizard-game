@@ -63,8 +63,14 @@ void enemy_fire_bullet(unsigned char x, unsigned char y, signed char vx, signed 
             ebullets[i].active = 1;
             ebullets[i].x = x;
             ebullets[i].y = y;
-            ebullets[i].width = 4;
-            ebullets[i].height = 4;
+            // Golem heavy bullets (palette = 0xFF) are 16x16, others are 4x4
+            if (palette == 0xFF) {
+                ebullets[i].width = 16;
+                ebullets[i].height = 16;
+            } else {
+                ebullets[i].width = 4;
+                ebullets[i].height = 4;
+            }
             ebullets[i].vx = vx;
             ebullets[i].vy = vy;
             ebullets[i].palette = palette;
@@ -134,6 +140,21 @@ void player_bullets_update_collide_draw(void) {
                 bullets[bi].active = 0;
 
                 if (enemies[(unsigned char)ei].hp) enemies[(unsigned char)ei].hp--;
+                
+                // BERSERKER: Golem speeds up aggressively when hit (scales to 0.5 px/frame)
+                // Speed progression: 10 -> 6 -> 4 -> 3 -> 2 frames/pixel (0.1 -> 0.5 px/frame)
+                if (enemies[(unsigned char)ei].type == 6 && enemies[(unsigned char)ei].hp > 0) {
+                  if (enemies[(unsigned char)ei].hp == 6) {
+                    enemies[(unsigned char)ei].move_threshold = 6;  // 0.17 px/frame
+                  } else if (enemies[(unsigned char)ei].hp == 5) {
+                    enemies[(unsigned char)ei].move_threshold = 4;  // 0.25 px/frame
+                  } else if (enemies[(unsigned char)ei].hp == 4) {
+                    enemies[(unsigned char)ei].move_threshold = 3;  // 0.33 px/frame
+                  } else if (enemies[(unsigned char)ei].hp <= 3) {
+                    enemies[(unsigned char)ei].move_threshold = 2;  // 0.50 px/frame (capped)
+                  }
+                }
+                
                 if (enemies[(unsigned char)ei].hp == 0) {
                     unsigned char enemy_type = enemies[(unsigned char)ei].type;
                     unsigned char enemy_x = enemies[(unsigned char)ei].x;
@@ -261,6 +282,11 @@ void enemy_bullets_update_collide_draw(void) {
             continue;
         }
 
-        oam_spr(ebullets[bi].x, ebullets[bi].y, BULLET_TILE, ebullets[bi].palette);
+        // Draw: Golem heavy bullets use 16x16 metasprite, others use 4x4 sprite
+        if (ebullets[bi].palette == 0xFF) {
+            oam_meta_spr(ebullets[bi].x, ebullets[bi].y, golem_bullet);
+        } else {
+            oam_spr(ebullets[bi].x, ebullets[bi].y, BULLET_TILE, ebullets[bi].palette);
+        }
     }
 }

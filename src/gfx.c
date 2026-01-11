@@ -117,6 +117,14 @@ const unsigned char large_bullet[]={
 	128
 };
 
+const unsigned char golem_bullet[]={
+	  0,  0,0x24,2|OAM_FLIP_H,
+	  0,  8,0x34,2|OAM_FLIP_H,
+	  8,  0,0x24,2,
+	  8,  8,0x34,2,
+	128
+};
+
 const unsigned char fire_spirit[]={
 	  0, 0, 0x60, 1|OAM_FLIP_H,
 	  0, 8, 0x70, 1|OAM_FLIP_H,

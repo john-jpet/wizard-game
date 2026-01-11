@@ -37,6 +37,7 @@ extern const unsigned char golem[];
 extern const unsigned char golem_1[];
 
 extern const unsigned char large_bullet[];
+extern const unsigned char golem_bullet[];
 
 
 #endif

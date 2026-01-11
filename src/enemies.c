@@ -79,6 +79,16 @@ void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
       enemies[i].anim = rand8() % ANIM_CYCLE;
       enemies[i].type = type;
       enemies[i].move_counter = 0;
+      
+      // BERSERKER: Golems start slow but speed up when damaged
+      if (type == 6) {
+        enemies[i].move_threshold = 10;  // Starts at 0.1 px/frame (10 frames per pixel)
+        enemies[i].golem_fired_flags = 0;  // Reset fired flags (bit 0 = 6HP bullet, bit 1 = 3HP bullet)
+      } else {
+        enemies[i].move_threshold = 0;  // Not used for other enemies
+        enemies[i].golem_fired_flags = 0;
+      }
+      
       return;
     }
   }
@@ -118,7 +128,7 @@ void enemies_update_and_draw(void) {
     // Type 4 (large slime): move 1 pixel every 5 frames = 0.2 px/frame (slow)
     // Type 5 (small slime): move 1 pixel every 2 frames = 0.5 px/frame (moderate)
     // Type 6 (golem): move 1 pixel every 10 frames = 0.1 px/frame (very slow)
-    if (enemies[i].type == 0 || enemies[i].type == 5) {
+    if (enemies[i].type == 0) {
       if (enemies[i].move_counter >= 2) {
         enemies[i].y++;
         enemies[i].move_counter = 0;
@@ -142,8 +152,8 @@ void enemies_update_and_draw(void) {
         enemies[i].move_counter = 0;
       }
     } else if (enemies[i].type == 6) {
-      // Golem: very slow, heavy movement
-      if (enemies[i].move_counter >= 10) {
+      // Golem: BERSERKER - uses dynamic move_threshold that speeds up when damaged
+      if (enemies[i].move_counter >= enemies[i].move_threshold) {
         enemies[i].y++;
         enemies[i].move_counter = 0;
       }
@@ -175,6 +185,16 @@ void enemies_update_and_draw(void) {
       enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, -1, 2, WARLOCK_PAL);
       enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, 0, 2, WARLOCK_PAL);
       enemy_fire_bullet(enemies[i].x + 4, enemies[i].y, 1, 2, WARLOCK_PAL);
+    } else if (enemies[i].type == 6) {
+      // Golem fires heavy bullets IMMEDIATELY when reaching HP thresholds
+      // Use bit flags to track if bullet already fired at each threshold
+      if (enemies[i].hp == 6 && !(enemies[i].golem_fired_flags & 1)) {
+        enemy_fire_bullet(enemies[i].x + 6, enemies[i].y + 16, 0, 3, 0xFF);  // 0xFF = golem heavy bullet marker
+        enemies[i].golem_fired_flags |= 1;  // Set bit 0 (fired at 6 HP)
+      } else if (enemies[i].hp == 3 && !(enemies[i].golem_fired_flags & 2)) {
+        enemy_fire_bullet(enemies[i].x + 6, enemies[i].y + 16, 0, 3, 0xFF);  // 0xFF = golem heavy bullet marker
+        enemies[i].golem_fired_flags |= 2;  // Set bit 1 (fired at 3 HP)
+      } 
     } 
     
     // DRAW: Combined in same loop to save iteration overhead
