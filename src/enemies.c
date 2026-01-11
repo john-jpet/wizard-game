@@ -126,7 +126,7 @@ void enemies_update_and_draw(void) {
     // Type 2 (warlock): move 1 pixel every 5 frames = 0.2 px/frame (slow), STOP when firing
     // Type 3 (fire spirit): move 1 pixel every 3 frames = 0.33 px/frame (low moderate, while weaving at 1 px/frame)
     // Type 4 (large slime): move 1 pixel every 5 frames = 0.2 px/frame (slow)
-    // Type 5 (small slime): move 1 pixel every 2 frames = 0.5 px/frame (moderate)
+    // Type 5 (small slime): move 1 pixel every 2 frames = 1 px/frame (fast)
     // Type 6 (golem): move 1 pixel every 10 frames = 0.1 px/frame (very slow)
     if (enemies[i].type == 0) {
       if (enemies[i].move_counter >= 2) {
