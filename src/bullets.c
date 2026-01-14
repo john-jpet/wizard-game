@@ -29,6 +29,7 @@ void ebullets_init(void) {
 
 void fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char vy) {
     unsigned char i;
+    
     for (i = 0; i < MAX_BULLETS; i++) {
         if (!bullets[i].active) {
             bullets[i].active = 1;
@@ -38,6 +39,7 @@ void fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char v
             bullets[i].height = 8;
             bullets[i].vx = vx;
             bullets[i].vy = vy;
+            sfx_play(SFX_JUMP, 0);
             return;
         }
     }
