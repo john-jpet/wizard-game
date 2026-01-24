@@ -7,27 +7,19 @@
 #define STAR_TILE 0x82
 #define EMPTY_STAR_TILE 0x83
 
-unsigned char i = 0;
+
 void hud_set_hp(unsigned char hp) {
-  // Only update hearts, NOT labels
-  for(i = 0; i < 3; i++) {
-    if(i < hp) {
-      one_vram_buffer(HEART_TILE, NTADR_A(4 + i, 1));
-    } else {
-      one_vram_buffer(EMPTY_HEART_TILE, NTADR_A(4 + i, 1));
-    }
-  }
+  one_vram_buffer((hp > 0) ? HEART_TILE : EMPTY_HEART_TILE, NTADR_A(4, 1));
+  one_vram_buffer((hp > 1) ? HEART_TILE : EMPTY_HEART_TILE, NTADR_A(5, 1));
+  one_vram_buffer((hp > 2) ? HEART_TILE : EMPTY_HEART_TILE, NTADR_A(6, 1));
 }
 
 void hud_set_mp(unsigned char mp) {
-  // Only update stars, NOT labels
-  for(i = 0; i < 5; i++) {
-    if(i < mp) {
-      one_vram_buffer(STAR_TILE, NTADR_A(4 + i, 2));
-    } else {
-      one_vram_buffer(EMPTY_STAR_TILE, NTADR_A(4 + i, 2));
-    }
-  }
+  one_vram_buffer((mp > 0) ? STAR_TILE : EMPTY_STAR_TILE, NTADR_A(4, 2));
+  one_vram_buffer((mp > 1) ? STAR_TILE : EMPTY_STAR_TILE, NTADR_A(5, 2));
+  one_vram_buffer((mp > 2) ? STAR_TILE : EMPTY_STAR_TILE, NTADR_A(6, 2));
+  one_vram_buffer((mp > 3) ? STAR_TILE : EMPTY_STAR_TILE, NTADR_A(7, 2));
+  one_vram_buffer((mp > 4) ? STAR_TILE : EMPTY_STAR_TILE, NTADR_A(8, 2));
 }
 
 void hud_set_score(unsigned int score) {
@@ -77,11 +69,5 @@ void hud_init(void) {
 }
 
 void hud_set_wave(unsigned char wave) {
-  // Update wave number display
-  one_vram_buffer('W', NTADR_A(12, 2));
-  one_vram_buffer('A', NTADR_A(13, 2));
-  one_vram_buffer('V', NTADR_A(14, 2));
-  one_vram_buffer('E', NTADR_A(15, 2));
-  one_vram_buffer(':', NTADR_A(16, 2));
   one_vram_buffer((unsigned char)('0' + wave), NTADR_A(17, 2));
 }

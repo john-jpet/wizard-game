@@ -28,8 +28,9 @@ void spawn_pickup(unsigned char x, unsigned char y, unsigned char type) {
   }
 }
 
-unsigned char tile;
+
 void pickups_update_draw(void) {
+  unsigned char tile;
   unsigned char i;
   for (i = 0; i < MAX_PICKUPS; i++) {
     if (!pickups[i].active) continue;
