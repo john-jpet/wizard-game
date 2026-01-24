@@ -10,7 +10,7 @@ FT_SFX_STREAMS	= 1			;number of sound effects played at once, 1..4
 FT_THREAD       = 1		;undefine if you call sound effects in the same thread as sound update
 FT_PAL_SUPPORT	= 1		;undefine to exclude PAL support
 FT_NTSC_SUPPORT	= 1		;undefine to exclude NTSC support
-FT_DPCM_ENABLE  = 0		;undefine to exclude all DMC code
+FT_DPCM_ENABLE  = 1		;undefine to exclude all DMC code
 FT_SFX_ENABLE   = 1		;undefine to exclude all sound effects code
 
 
@@ -260,7 +260,7 @@ detectNTSC:
 .segment "RODATA"
 
 music_data:
-;	.include "music.s"
+	.include "../assets/music/arcana.s"
 
 
 
@@ -272,8 +272,7 @@ sounds_data:
 	
 	
 .segment "SAMPLES"
-;	.incbin "music_dpcm.bin"
-
+	.incbin "../assets/music/arcana.dmc"
 
 
 .segment "VECTORS"

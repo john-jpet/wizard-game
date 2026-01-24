@@ -93,6 +93,7 @@ static void enter_play(void) {
   player_init();
   pickups_init();
   score_reset();
+  music_play(0);
   
   // Reset wave durations (they get modified during gameplay)
   for (i = 0; i < 10; i++) {
