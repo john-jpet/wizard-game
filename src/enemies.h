@@ -10,6 +10,9 @@ extern Enemy enemies[MAX_ENEMIES];
 // lane table lives in enemies.c
 extern signed char lane_enemy[LANES];
 
+extern unsigned char active_enemies_count;
+
+
 void enemies_init(void);
 void spawn_enemy(unsigned char x, unsigned char y, unsigned char type);
 void enemies_update_and_draw(void);

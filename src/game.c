@@ -45,6 +45,7 @@ void nuke_trigger(void) {
   for (i = 0; i < MAX_ENEMIES; i++) {
     if (enemies[i].active) {
       enemies[i].active = 0;
+      active_enemies_count--;
       score_add(ENEMY_KILL_SCORE);
       
       // Roll for pickup drops

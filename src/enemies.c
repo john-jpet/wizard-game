@@ -18,7 +18,7 @@
 
 Enemy enemies[MAX_ENEMIES];
 signed char lane_enemy[LANES];
-
+unsigned char active_enemies_count = 0;
 // lane helper
 unsigned char enemy_lane_from_center(unsigned char ex) {
   return (unsigned char)((ex + 8) >> LANE_SHIFT);
@@ -27,15 +27,11 @@ unsigned char enemy_lane_from_center(unsigned char ex) {
 void enemies_init(void) {
   unsigned char i;
   for (i = 0; i < MAX_ENEMIES; i++) enemies[i].active = 0;
+  active_enemies_count = 0;
 }
 
 unsigned char count_active_enemies(void) {
-  unsigned char count = 0;
-  unsigned char i;
-  for (i = 0; i < MAX_ENEMIES; i++) {
-    if (enemies[i].active) count++;
-  }
-  return count;
+  return active_enemies_count;
 }
 
 void clear_enemy_bullets(void) {
@@ -45,6 +41,7 @@ void clear_enemy_bullets(void) {
 
 void spawn_enemy(unsigned char x, unsigned char y, unsigned char type) {
   unsigned char i;
+  active_enemies_count++;
   for (i = 0; i < MAX_ENEMIES; i++) {
     if (!enemies[i].active) {
       enemies[i].active = 1;
@@ -163,6 +160,7 @@ void enemies_update_and_draw(void) {
     }
     
     if (enemies[i].y >= ENEMY_BOTTOM_Y) {
+      active_enemies_count--;
       enemies[i].active = 0;
       player_take_damage();
       continue;

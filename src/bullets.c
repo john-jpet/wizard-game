@@ -164,6 +164,7 @@ void player_bullets_update_collide_draw(void) {
                     
                     enemies[(unsigned char)ei].active = 0;
                     pending_kills++; // Increment kill counter
+                    active_enemies_count--;
                     
                     // Large slime splits into 2 small slimes (keep this - it's gameplay critical)
                     if (enemy_type == 4) {
@@ -240,6 +241,7 @@ void super_update_collide_draw(void) {
       unsigned char enemy_y = enemies[(unsigned char)ei].y;
       
       enemies[(unsigned char)ei].active = 0;
+      active_enemies_count--;
       
       // Large slime splits into 2 small slimes
       if (enemy_type == 4) {
