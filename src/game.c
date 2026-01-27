@@ -37,6 +37,8 @@ static const unsigned char flash_palette_sp[] = {
 void nuke_trigger(void) {
   unsigned char i;
   unsigned char d;
+
+  sfx_play(SFX_SCREEN_CLEAR, 0);
   
   if (nuke_timer) return;        // already nuking
   nuke_timer = NUKE_FLASH_DURATION;

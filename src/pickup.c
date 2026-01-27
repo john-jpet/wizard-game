@@ -3,6 +3,7 @@
 #include "pickup.h"
 #include "game.h"
 #include "player.h"
+#include "gfx.h"
 
 Pickup pickups[MAX_PICKUPS];
 
@@ -41,6 +42,7 @@ void pickups_update_draw(void) {
       continue;
     }
     if(check_collision((Sprite*)&pickups[i], (Sprite*)&wizard)) {
+      sfx_play(SFX_DING, 0);
       pickups[i].active = 0;
       if(pickups[i].type == 0) {
         player_heal();

@@ -39,27 +39,29 @@ void fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char v
             bullets[i].height = 8;
             bullets[i].vx = vx;
             bullets[i].vy = vy;
-            sfx_play(SFX_JUMP, 0);
+            sfx_play(SFX_FIRE, 0);
             return;
         }
     }
 }
 
 void fire_super(unsigned char x, unsigned char y, signed char vx, signed char vy) {
-  if (superbullet.active) return;
-  player_use_mp(1);
-  superbullet.active = 1;
-  superbullet.x = x;
-  superbullet.y = y;
-  superbullet.width = 16;
-  superbullet.height = 16;
-  superbullet.vx = vx;
-  superbullet.vy = vy;
+    sfx_play(SFX_SUPER, 0);
+    if (superbullet.active) return;
+    player_use_mp(1);
+    superbullet.active = 1;
+    superbullet.x = x;
+    superbullet.y = y;
+    superbullet.width = 16;
+    superbullet.height = 16;
+    superbullet.vx = vx;
+    superbullet.vy = vy;
 }
 
 
 void enemy_fire_bullet(unsigned char x, unsigned char y, signed char vx, signed char vy, unsigned char palette) {
     unsigned char i;
+    sfx_play(SFX_FIRE, 0);
     for (i = 0; i < MAX_ENEMY_BULLETS; i++) {
         if (!ebullets[i].active) {
             ebullets[i].active = 1;
@@ -163,6 +165,7 @@ void player_bullets_update_collide_draw(void) {
                     unsigned char enemy_y = enemies[(unsigned char)ei].y;
                     
                     enemies[(unsigned char)ei].active = 0;
+                    sfx_play(SFX_ENEMY_KILL, 0);
                     pending_kills++; // Increment kill counter
                     active_enemies_count--;
                     

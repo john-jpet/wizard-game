@@ -4,7 +4,7 @@
 
 #include "neslib.h"
 
-enum {SFX_JUMP, SFX_DING, SFX_NOISE};
+enum {SFX_FIRE, SFX_ENEMY_KILL, SFX_DING, SFX_SCREEN_CLEAR, SFX_SUPER};
 
 // palettes + title text
 extern const unsigned char palette_bg[];
